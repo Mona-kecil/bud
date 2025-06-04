@@ -1,37 +1,107 @@
-import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
+import { AccountsOverview } from "~/components/accounts-overview"
+import { BudgetOverview } from "~/components/budget-overview"
+import { RecentTransactions } from "~/components/recent-transactions"
+import { SpendingPieChart } from "~/components/spending-pie-chart"
+import { SavingsRateChart } from "~/components/savings-rate-chart"
+import { DollarSign } from "lucide-react"
 
-export default function HomePage() {
+export default function Dashboard() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-          Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-        </h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/usage/first-steps"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">First Steps →</h3>
-            <div className="text-lg">
-              Just the basics - Everything you need to know to set up your
-              database and authentication.
-            </div>
-          </Link>
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/introduction"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">Documentation →</h3>
-            <div className="text-lg">
-              Learn more about Create T3 App, the libraries it uses, and how to
-              deploy it.
-            </div>
-          </Link>
-        </div>
+    <div className="flex flex-col gap-4 md:gap-8">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$12,580.25</div>
+            <p className="text-xs text-muted-foreground">+$1,245.12 from last month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$4,750.00</div>
+            <p className="text-xs text-muted-foreground">+$250.00 from last month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$2,890.15</div>
+            <p className="text-xs text-muted-foreground">+$435.87 from last month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Savings Rate</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">39.2%</div>
+            <p className="text-xs text-muted-foreground">-2.5% from last month</p>
+          </CardContent>
+        </Card>
       </div>
-    </main>
-  );
+      <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle>Spending by Category</CardTitle>
+              <CardDescription>Your spending distribution across categories</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SpendingPieChart />
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-4">
+            <CardHeader>
+              <CardTitle>Savings Rate Trend</CardTitle>
+              <CardDescription>Your savings rate over the past year</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SavingsRateChart />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="lg:col-span-4">
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>Your latest financial activity</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RecentTransactions />
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle>Budget Overview</CardTitle>
+              <CardDescription>Your monthly budget progress</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BudgetOverview />
+            </CardContent>
+          </Card>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Accounts Overview</CardTitle>
+            <CardDescription>Summary of your financial accounts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AccountsOverview />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
 }
