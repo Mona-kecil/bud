@@ -1,9 +1,15 @@
-import { PlusCircle } from "lucide-react"
+import { PlusCircle } from "lucide-react";
 
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { AccountsOverview } from "~/components/accounts-overview"
-import { mockAccounts } from "~/lib/mock-data"
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { AccountsOverview } from "~/components/accounts-overview";
+import { mockAccounts } from "~/lib/mock-data";
 
 export default function AccountsPage() {
   return (
@@ -74,12 +80,14 @@ export default function AccountsPage() {
       <Card>
         <CardHeader>
           <CardTitle>All Accounts</CardTitle>
-          <CardDescription>Manage your connected financial accounts</CardDescription>
+          <CardDescription>
+            Manage your connected financial accounts
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <AccountsOverview showAll={true} />
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

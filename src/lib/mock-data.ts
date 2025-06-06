@@ -161,7 +161,7 @@ export const mockTransactions = [
     type: "investment",
     category: "investment",
   },
-]
+];
 
 // Mock Budgets
 export const mockBudgets = [
@@ -213,7 +213,7 @@ export const mockBudgets = [
     limit: 500.0,
     spent: 0.0,
   },
-]
+];
 
 // Mock Accounts
 export const mockAccounts = [
@@ -252,7 +252,7 @@ export const mockAccounts = [
     type: "Retirement",
     balance: 85750.0,
   },
-]
+];
 
 // Mock Financial Goals
 export const mockGoals = [
@@ -284,4 +284,4 @@ export const mockGoals = [
     current: 15000.0,
     deadline: "January 2027",
   },
-]
+];

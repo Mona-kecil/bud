@@ -1,9 +1,15 @@
-import { PlusCircle } from "lucide-react"
+import { PlusCircle } from "lucide-react";
 
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { Progress } from "~/components/ui/progress"
-import { mockGoals } from "~/lib/mock-data"
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Progress } from "~/components/ui/progress";
+import { mockGoals } from "~/lib/mock-data";
 
 export default function GoalsPage() {
   return (
@@ -17,7 +23,7 @@ export default function GoalsPage() {
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {mockGoals.map((goal) => {
-          const percentage = Math.min(100, (goal.current / goal.target) * 100)
+          const percentage = Math.min(100, (goal.current / goal.target) * 100);
 
           return (
             <Card key={goal.id}>
@@ -28,35 +34,39 @@ export default function GoalsPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       ${goal.current.toFixed(2)} of ${goal.target.toFixed(2)}
                     </div>
-                    <div className="text-sm font-medium">{percentage.toFixed(0)}%</div>
+                    <div className="text-sm font-medium">
+                      {percentage.toFixed(0)}%
+                    </div>
                   </div>
                   <Progress value={percentage} className="h-2" />
                 </div>
                 <div className="flex justify-between">
                   <div>
                     <div className="text-sm font-medium">Remaining</div>
-                    <div className="text-lg font-bold">${(goal.target - goal.current).toFixed(2)}</div>
+                    <div className="text-lg font-bold">
+                      ${(goal.target - goal.current).toFixed(2)}
+                    </div>
                   </div>
                   <Button size="sm">Add Funds</Button>
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
         <Card className="flex flex-col items-center justify-center p-6">
-          <div className="mb-4 rounded-full bg-muted p-3">
-            <PlusCircle className="h-6 w-6 text-muted-foreground" />
+          <div className="bg-muted mb-4 rounded-full p-3">
+            <PlusCircle className="text-muted-foreground h-6 w-6" />
           </div>
           <h3 className="mb-2 text-lg font-medium">Create New Goal</h3>
-          <p className="mb-4 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground mb-4 text-center text-sm">
             Set up a new financial goal to track your progress
           </p>
           <Button>Get Started</Button>
         </Card>
       </div>
     </div>
-  )
+  );
 }

@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { mockAccounts } from "~/lib/mock-data"
-import { Button } from "~/components/ui/button"
+import Image from "next/image";
+import { mockAccounts } from "~/lib/mock-data";
+import { Button } from "~/components/ui/button";
 
 interface AccountsOverviewProps {
-  showAll?: boolean
+  showAll?: boolean;
 }
 
 export function AccountsOverview({ showAll = false }: AccountsOverviewProps) {
-  const accounts = showAll ? mockAccounts : mockAccounts.slice(0, 3)
+  const accounts = showAll ? mockAccounts : mockAccounts.slice(0, 3);
 
   return (
     <div className="space-y-4">
@@ -25,12 +25,14 @@ export function AccountsOverview({ showAll = false }: AccountsOverviewProps) {
             />
           </div>
           <div className="ml-4 space-y-1">
-            <p className="text-sm font-medium leading-none">{account.name}</p>
-            <p className="text-xs text-muted-foreground">{account.institution}</p>
+            <p className="text-sm leading-none font-medium">{account.name}</p>
+            <p className="text-muted-foreground text-xs">
+              {account.institution}
+            </p>
           </div>
           <div className="ml-auto text-right">
             <p className="text-sm font-medium">${account.balance.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground">{account.type}</p>
+            <p className="text-muted-foreground text-xs">{account.type}</p>
           </div>
         </div>
       ))}
@@ -45,5 +47,5 @@ export function AccountsOverview({ showAll = false }: AccountsOverviewProps) {
         </Button>
       )}
     </div>
-  )
+  );
 }

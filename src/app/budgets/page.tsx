@@ -1,9 +1,15 @@
-import { PlusCircle } from "lucide-react"
+import { PlusCircle } from "lucide-react";
 
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { BudgetOverview } from "~/components/budget-overview"
-import { mockBudgets } from "~/lib/mock-data"
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { BudgetOverview } from "~/components/budget-overview";
+import { mockBudgets } from "~/lib/mock-data";
 
 export default function BudgetsPage() {
   return (
@@ -18,11 +24,16 @@ export default function BudgetsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Budgeted</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Budgeted
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${mockBudgets.reduce((sum, budget) => sum + budget.limit, 0).toFixed(2)}
+              $
+              {mockBudgets
+                .reduce((sum, budget) => sum + budget.limit, 0)
+                .toFixed(2)}
             </div>
           </CardContent>
         </Card>
@@ -32,7 +43,10 @@ export default function BudgetsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${mockBudgets.reduce((sum, budget) => sum + budget.spent, 0).toFixed(2)}
+              $
+              {mockBudgets
+                .reduce((sum, budget) => sum + budget.spent, 0)
+                .toFixed(2)}
             </div>
           </CardContent>
         </Card>
@@ -69,12 +83,14 @@ export default function BudgetsPage() {
       <Card>
         <CardHeader>
           <CardTitle>All Budgets</CardTitle>
-          <CardDescription>Track your spending against budget categories</CardDescription>
+          <CardDescription>
+            Track your spending against budget categories
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <BudgetOverview showAll={true} />
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

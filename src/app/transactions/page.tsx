@@ -1,35 +1,53 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { PlusCircle, Search } from "lucide-react"
+import { useState } from "react";
+import { PlusCircle, Search } from "lucide-react";
 
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { Input } from "~/components/ui/input"
-import { TransactionItem } from "~/components/transaction-item"
-import { mockTransactions as initialTransactions } from "~/lib/mock-data"
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { TransactionItem } from "~/components/transaction-item";
+import { mockTransactions as initialTransactions } from "~/lib/mock-data";
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState(initialTransactions)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [transactions, setTransactions] = useState(initialTransactions);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const filteredTransactions = transactions.filter(
     (transaction) =>
-      transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction.description
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       transaction.merchant.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  );
 
-  const incomeTransactions = filteredTransactions.filter((t) => t.type === "income")
-  const expenseTransactions = filteredTransactions.filter((t) => t.type === "expense")
-  const investmentTransactions = filteredTransactions.filter((t) => t.type !== "income" && t.type !== "expense")
+  const incomeTransactions = filteredTransactions.filter(
+    (t) => t.type === "income",
+  );
+  const expenseTransactions = filteredTransactions.filter(
+    (t) => t.type === "expense",
+  );
+  const investmentTransactions = filteredTransactions.filter(
+    (t) => t.type !== "income" && t.type !== "expense",
+  );
 
   const handleDeleteTransaction = (id: string) => {
-    setTransactions(transactions.filter((t) => t.id !== id))
-  }
+    setTransactions(transactions.filter((t) => t.id !== id));
+  };
 
   const handleEditTransaction = (id: string, updatedTransaction: any) => {
-    setTransactions(transactions.map((t) => (t.id === id ? { ...t, ...updatedTransaction } : t)))
-  }
+    setTransactions(
+      transactions.map((t) =>
+        t.id === id ? { ...t, ...updatedTransaction } : t,
+      ),
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -43,8 +61,8 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      <div className="relative flex-1 mb-6">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="relative mb-6 flex-1">
+        <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
         <Input
           type="search"
           placeholder="Search transactions..."
@@ -73,7 +91,9 @@ export default function TransactionsPage() {
                   />
                 ))
               ) : (
-                <div className="py-6 text-center text-muted-foreground">No income transactions found.</div>
+                <div className="text-muted-foreground py-6 text-center">
+                  No income transactions found.
+                </div>
               )}
             </div>
           </CardContent>
@@ -97,7 +117,9 @@ export default function TransactionsPage() {
                   />
                 ))
               ) : (
-                <div className="py-6 text-center text-muted-foreground">No expense transactions found.</div>
+                <div className="text-muted-foreground py-6 text-center">
+                  No expense transactions found.
+                </div>
               )}
             </div>
           </CardContent>
@@ -121,12 +143,14 @@ export default function TransactionsPage() {
                   />
                 ))
               ) : (
-                <div className="py-6 text-center text-muted-foreground">No investment transactions found.</div>
+                <div className="text-muted-foreground py-6 text-center">
+                  No investment transactions found.
+                </div>
               )}
             </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

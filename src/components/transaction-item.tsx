@@ -1,10 +1,21 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ArrowDownLeft, ArrowUpRight, Edit, MoreHorizontal, Trash } from "lucide-react"
+import { useState } from "react";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Edit,
+  MoreHorizontal,
+  Trash,
+} from "lucide-react";
 
-import { Button } from "~/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu"
+import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -12,47 +23,59 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 interface TransactionItemProps {
   transaction: {
-    id: string
-    date: string
-    merchant: string
-    description: string
-    amount: number
-    type: string
-    category: string
-  }
-  onDelete: (id: string) => void
-  onEdit: (id: string, updatedTransaction: any) => void
+    id: string;
+    date: string;
+    merchant: string;
+    description: string;
+    amount: number;
+    type: string;
+    category: string;
+  };
+  onDelete: (id: string) => void;
+  onEdit: (id: string, updatedTransaction: any) => void;
 }
 
-export function TransactionItem({ transaction, onDelete, onEdit }: TransactionItemProps) {
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [editedTransaction, setEditedTransaction] = useState({ ...transaction })
+export function TransactionItem({
+  transaction,
+  onDelete,
+  onEdit,
+}: TransactionItemProps) {
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [editedTransaction, setEditedTransaction] = useState({
+    ...transaction,
+  });
 
   const handleEdit = () => {
-    setShowEditDialog(true)
-  }
+    setShowEditDialog(true);
+  };
 
   const handleDelete = () => {
-    setShowDeleteDialog(true)
-  }
+    setShowDeleteDialog(true);
+  };
 
   const confirmEdit = () => {
-    onEdit(transaction.id, editedTransaction)
-    setShowEditDialog(false)
-  }
+    onEdit(transaction.id, editedTransaction);
+    setShowEditDialog(false);
+  };
 
   const confirmDelete = () => {
-    onDelete(transaction.id)
-    setShowDeleteDialog(false)
-  }
+    onDelete(transaction.id);
+    setShowDeleteDialog(false);
+  };
 
   return (
     <>
@@ -67,8 +90,12 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
           )}
         </div>
         <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">{transaction.merchant}</p>
-          <p className="text-xs text-muted-foreground">{transaction.description}</p>
+          <p className="text-sm leading-none font-medium">
+            {transaction.merchant}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            {transaction.description}
+          </p>
         </div>
         <div className="ml-auto text-right">
           <p
@@ -80,9 +107,10 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
                   : "text-blue-500"
             }`}
           >
-            {transaction.type === "expense" ? "-" : "+"}${transaction.amount.toFixed(2)}
+            {transaction.type === "expense" ? "-" : "+"}$
+            {transaction.amount.toFixed(2)}
           </p>
-          <p className="text-xs text-muted-foreground">{transaction.date}</p>
+          <p className="text-muted-foreground text-xs">{transaction.date}</p>
         </div>
         <div className="ml-2">
           <DropdownMenu>
@@ -111,7 +139,9 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Transaction</DialogTitle>
-            <DialogDescription>Make changes to this transaction.</DialogDescription>
+            <DialogDescription>
+              Make changes to this transaction.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -121,7 +151,12 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
               <Input
                 id="merchant"
                 value={editedTransaction.merchant}
-                onChange={(e) => setEditedTransaction({ ...editedTransaction, merchant: e.target.value })}
+                onChange={(e) =>
+                  setEditedTransaction({
+                    ...editedTransaction,
+                    merchant: e.target.value,
+                  })
+                }
                 className="col-span-3"
               />
             </div>
@@ -132,7 +167,12 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
               <Input
                 id="description"
                 value={editedTransaction.description}
-                onChange={(e) => setEditedTransaction({ ...editedTransaction, description: e.target.value })}
+                onChange={(e) =>
+                  setEditedTransaction({
+                    ...editedTransaction,
+                    description: e.target.value,
+                  })
+                }
                 className="col-span-3"
               />
             </div>
@@ -145,7 +185,10 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
                 type="number"
                 value={editedTransaction.amount}
                 onChange={(e) =>
-                  setEditedTransaction({ ...editedTransaction, amount: Number.parseFloat(e.target.value) })
+                  setEditedTransaction({
+                    ...editedTransaction,
+                    amount: Number.parseFloat(e.target.value),
+                  })
                 }
                 className="col-span-3"
               />
@@ -156,7 +199,9 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
               </Label>
               <Select
                 value={editedTransaction.type}
-                onValueChange={(value) => setEditedTransaction({ ...editedTransaction, type: value })}
+                onValueChange={(value) =>
+                  setEditedTransaction({ ...editedTransaction, type: value })
+                }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select type" />
@@ -175,7 +220,12 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
               <Input
                 id="category"
                 value={editedTransaction.category}
-                onChange={(e) => setEditedTransaction({ ...editedTransaction, category: e.target.value })}
+                onChange={(e) =>
+                  setEditedTransaction({
+                    ...editedTransaction,
+                    category: e.target.value,
+                  })
+                }
                 className="col-span-3"
               />
             </div>
@@ -195,11 +245,15 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this transaction? This action cannot be undone.
+              Are you sure you want to delete this transaction? This action
+              cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
@@ -209,5 +263,5 @@ export function TransactionItem({ transaction, onDelete, onEdit }: TransactionIt
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

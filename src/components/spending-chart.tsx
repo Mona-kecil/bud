@@ -1,7 +1,15 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { useEffect, useState } from "react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const data = [
   { date: "May 1", amount: 120 },
@@ -34,34 +42,50 @@ const data = [
   { date: "May 28", amount: 136 },
   { date: "May 29", amount: 99 },
   { date: "May 30", amount: 87 },
-]
+];
 
 export function SpendingChart() {
-  const [isMounted, setIsMounted] = useState(false)
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
+    setIsMounted(true);
+  }, []);
 
   if (!isMounted) {
-    return null
+    return null;
   }
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <AreaChart
+        data={data}
+        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+      >
         <defs>
           <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
             <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <XAxis dataKey="date" tick={{ fontSize: 12 }} tickFormatter={(value) => value.split(" ")[1]} />
+        <XAxis
+          dataKey="date"
+          tick={{ fontSize: 12 }}
+          tickFormatter={(value) => value.split(" ")[1]}
+        />
         <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <Tooltip formatter={(value) => [`$${value}`, "Spending"]} labelFormatter={(label) => `Date: ${label}`} />
-        <Area type="monotone" dataKey="amount" stroke="#10b981" fillOpacity={1} fill="url(#colorAmount)" />
+        <Tooltip
+          formatter={(value) => [`$${value}`, "Spending"]}
+          labelFormatter={(label) => `Date: ${label}`}
+        />
+        <Area
+          type="monotone"
+          dataKey="amount"
+          stroke="#10b981"
+          fillOpacity={1}
+          fill="url(#colorAmount)"
+        />
       </AreaChart>
     </ResponsiveContainer>
-  )
+  );
 }
