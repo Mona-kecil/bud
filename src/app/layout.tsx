@@ -16,6 +16,7 @@ import { Inter } from "next/font/google";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { ConvexClientProvider } from "~/components/convex-client-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,9 +34,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="bg-muted/40 flex min-h-screen w-full flex-col">
-          <div className="bg-background flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
+        <ConvexClientProvider>
+          <div className="bg-muted/40 flex min-h-screen w-full flex-col">
+            <div className="bg-background flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+              <Link href="/" className="flex items-center gap-2 font-semibold">
               <Wallet className="h-6 w-6 text-emerald-500" />
               <span>MintClone</span>
             </Link>
@@ -95,8 +97,9 @@ export default function RootLayout({
               </nav>
             </div>
             <main className="flex-1 p-4 lg:p-6">{children}</main>
+            </div>
           </div>
-        </div>
+        </ConvexClientProvider>
       </body>
     </html>
   );
