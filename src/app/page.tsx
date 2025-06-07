@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -11,8 +13,10 @@ import { RecentTransactions } from "~/components/recent-transactions";
 import { SpendingPieChart } from "~/components/spending-pie-chart";
 import { SavingsRateChart } from "~/components/savings-rate-chart";
 import { DollarSign } from "lucide-react";
+import { useStatsigClient } from "@statsig/react-bindings";
 
 export default function Dashboard() {
+  const { client } = useStatsigClient();
   return (
     <div className="flex flex-col gap-4 md:gap-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -27,6 +31,13 @@ export default function Dashboard() {
               +$1,245.12 from last month
             </p>
           </CardContent>
+          <button
+            onClick={() => {
+              client.logEvent("test_event");
+            }}
+          >
+            Test statsig event
+          </button>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
