@@ -2,17 +2,11 @@
 
 import * as React from "react";
 import {
-  ArrowBigUp,
-  BookOpen,
-  Bot,
-  CircleDollarSign,
   CommandIcon,
   CreditCard,
   DollarSign,
   PieChart,
   PiggyBank,
-  Settings2,
-  SquareTerminal,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";

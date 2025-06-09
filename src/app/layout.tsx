@@ -20,11 +20,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-      <script
+        {process.env.NODE_ENV === "development" && (
+        <script
           crossOrigin="anonymous"
-          src="//unpkg.com/react-scan/dist/auto.global.js"
-          defer
-        />
+            src="//unpkg.com/react-scan/dist/auto.global.js"
+            defer
+          />
+        )}
       </head>
       <body className={inter.className}>
         <ClerkProvider>
