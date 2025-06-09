@@ -13,7 +13,6 @@ export default function SummaryCharts({
   data: {
     spendingByCategory: {
       category: string;
-      valueInPercentage: string;
       percentage: number;
     }[];
     savingsRateTrend: {
@@ -40,7 +39,12 @@ export default function SummaryCharts({
                   type: "pie",
                   angleKey: "percentage",
                   calloutLabelKey: "category",
-                  sectorLabelKey: "valueInPercentage",
+                  sectorLabelKey: "percentage",
+                  sectorLabelName: "Percentage",
+                  sectorLabel: {
+                    formatter: ({ value }: { value: number }) =>
+                      `${(value * 100).toFixed(0)}%`,
+                  },
                   fills: [
                     "#10B981", // emerald-500
                     "#059669", // emerald-600
