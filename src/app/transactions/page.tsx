@@ -298,8 +298,8 @@ export default function TransactionsPage() {
                           {activeTab === "all"
                             ? "Categories"
                             : activeTab.charAt(0).toUpperCase() +
-                            activeTab.slice(0, -1) +
-                            " Categories"}
+                              activeTab.slice(0, -1) +
+                              " Categories"}
                         </SelectItem>
                         {actualCategories.map((category) => (
                           <SelectItem key={category} value={category}>
@@ -376,9 +376,9 @@ export default function TransactionsPage() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <div className="p-4 space-y-4">
+                        <div className="space-y-4 p-4">
                           <div className="space-y-2">
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-muted-foreground text-sm">
                               {!dateFrom && !dateTo
                                 ? "Click a date to start selecting range"
                                 : dateFrom && !dateTo
@@ -387,7 +387,11 @@ export default function TransactionsPage() {
                             </div>
                             <Calendar
                               mode="range"
-                              selected={dateFrom && dateTo ? { from: dateFrom, to: dateTo } : undefined}
+                              selected={
+                                dateFrom && dateTo
+                                  ? { from: dateFrom, to: dateTo }
+                                  : undefined
+                              }
                               onSelect={(range) => {
                                 if (range?.from) {
                                   setDateFrom(range.from);
