@@ -26,6 +26,7 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { formatCurrency } from "~/lib/utils";
 import {
   Select,
   SelectContent,
@@ -107,8 +108,8 @@ export function TransactionItem({
                   : "text-blue-500"
             }`}
           >
-            {transaction.type === "expense" ? "-" : "+"}$
-            {transaction.amount.toFixed(2)}
+            {transaction.type === "expense" ? "-" : "+"}
+            {formatCurrency(transaction.amount)}
           </p>
           <p className="text-muted-foreground text-xs">{transaction.date}</p>
         </div>
@@ -182,14 +183,21 @@ export function TransactionItem({
               </Label>
               <Input
                 id="amount"
-                type="number"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
                 value={editedTransaction.amount}
-                onChange={(e) =>
-                  setEditedTransaction({
-                    ...editedTransaction,
-                    amount: Number.parseFloat(e.target.value),
-                  })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only numbers and decimal point
+                  if (/^\d*\.?\d*$/.test(value)) {
+                    setEditedTransaction({
+                      ...editedTransaction,
+                      amount: parseFloat(value) || 0,
+                    });
+                  }
+                }}
+                placeholder="0.00"
                 className="col-span-3"
               />
             </div>

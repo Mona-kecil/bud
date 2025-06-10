@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/card";
 import { AccountsOverview } from "~/components/accounts-overview";
 import { mockAccounts } from "~/lib/mock-data";
+import { formatCurrency } from "~/lib/utils";
 
 export default function AccountsPage() {
   return (
@@ -28,11 +29,11 @@ export default function AccountsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
-              {mockAccounts
-                .filter((account) => account.type !== "Credit")
-                .reduce((sum, account) => sum + account.balance, 0)
-                .toFixed(2)}
+              {formatCurrency(
+                mockAccounts
+                  .filter((account) => account.type !== "Credit")
+                  .reduce((sum, account) => sum + account.balance, 0),
+              )}
             </div>
           </CardContent>
         </Card>
@@ -42,11 +43,11 @@ export default function AccountsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
-              {mockAccounts
-                .filter((account) => account.type === "Credit")
-                .reduce((sum, account) => sum + account.balance, 0)
-                .toFixed(2)}
+              {formatCurrency(
+                mockAccounts
+                  .filter((account) => account.type === "Credit")
+                  .reduce((sum, account) => sum + account.balance, 0),
+              )}
             </div>
           </CardContent>
         </Card>
@@ -56,15 +57,14 @@ export default function AccountsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
-              {(
+              {formatCurrency(
                 mockAccounts
                   .filter((account) => account.type !== "Credit")
                   .reduce((sum, account) => sum + account.balance, 0) -
-                mockAccounts
-                  .filter((account) => account.type === "Credit")
-                  .reduce((sum, account) => sum + account.balance, 0)
-              ).toFixed(2)}
+                  mockAccounts
+                    .filter((account) => account.type === "Credit")
+                    .reduce((sum, account) => sum + account.balance, 0),
+              )}
             </div>
           </CardContent>
         </Card>

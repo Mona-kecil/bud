@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/card";
 import { BudgetOverview } from "~/components/budget-overview";
 import { mockBudgets } from "~/lib/mock-data";
+import { formatCurrency } from "~/lib/utils";
 
 export default function BudgetsPage() {
   return (
@@ -30,10 +31,9 @@ export default function BudgetsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
-              {mockBudgets
-                .reduce((sum, budget) => sum + budget.limit, 0)
-                .toFixed(2)}
+              {formatCurrency(
+                mockBudgets.reduce((sum, budget) => sum + budget.limit, 0),
+              )}
             </div>
           </CardContent>
         </Card>
@@ -43,10 +43,9 @@ export default function BudgetsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
-              {mockBudgets
-                .reduce((sum, budget) => sum + budget.spent, 0)
-                .toFixed(2)}
+              {formatCurrency(
+                mockBudgets.reduce((sum, budget) => sum + budget.spent, 0),
+              )}
             </div>
           </CardContent>
         </Card>
@@ -56,11 +55,10 @@ export default function BudgetsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
-              {(
+              {formatCurrency(
                 mockBudgets.reduce((sum, budget) => sum + budget.limit, 0) -
-                mockBudgets.reduce((sum, budget) => sum + budget.spent, 0)
-              ).toFixed(2)}
+                  mockBudgets.reduce((sum, budget) => sum + budget.spent, 0),
+              )}
             </div>
           </CardContent>
         </Card>

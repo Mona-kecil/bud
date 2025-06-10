@@ -3,6 +3,7 @@
 import { mockBudgets } from "~/lib/mock-data";
 import { Progress } from "~/components/ui/progress";
 import { Button } from "~/components/ui/button";
+import { formatCurrency } from "~/lib/utils";
 
 interface BudgetOverviewProps {
   showAll?: boolean;
@@ -23,7 +24,8 @@ export function BudgetOverview({ showAll = false }: BudgetOverviewProps) {
               <div className="space-y-0.5">
                 <div className="text-sm font-medium">{budget.category}</div>
                 <div className="text-muted-foreground text-xs">
-                  ${budget.spent.toFixed(2)} of ${budget.limit.toFixed(2)}
+                  {formatCurrency(budget.spent)} of{" "}
+                  {formatCurrency(budget.limit)}
                 </div>
               </div>
               <div

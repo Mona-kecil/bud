@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 import { mockGoals } from "~/lib/mock-data";
+import { formatCurrency } from "~/lib/utils";
 
 export default function GoalsPage() {
   return (
@@ -35,7 +36,8 @@ export default function GoalsPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="text-muted-foreground text-sm">
-                      ${goal.current.toFixed(2)} of ${goal.target.toFixed(2)}
+                      {formatCurrency(goal.current)} of{" "}
+                      {formatCurrency(goal.target)}
                     </div>
                     <div className="text-sm font-medium">
                       {percentage.toFixed(0)}%
@@ -47,7 +49,7 @@ export default function GoalsPage() {
                   <div>
                     <div className="text-sm font-medium">Remaining</div>
                     <div className="text-lg font-bold">
-                      ${(goal.target - goal.current).toFixed(2)}
+                      {formatCurrency(goal.target - goal.current)}
                     </div>
                   </div>
                   <Button size="sm">Add Funds</Button>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { mockAccounts } from "~/lib/mock-data";
 import { Button } from "~/components/ui/button";
+import Link from "next/link";
 
 interface AccountsOverviewProps {
   showAll?: boolean;
@@ -37,9 +38,11 @@ export function AccountsOverview({ showAll = false }: AccountsOverviewProps) {
         </div>
       ))}
       {!showAll && (
-        <Button variant="outline" className="w-full" size="sm">
-          View All Accounts
-        </Button>
+        <Link href="/accounts" passHref>
+          <Button variant="outline" className="w-full" size="sm">
+            View All Accounts
+          </Button>
+        </Link>
       )}
       {showAll && (
         <Button className="w-full" size="sm">
