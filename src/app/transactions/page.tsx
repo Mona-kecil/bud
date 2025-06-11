@@ -36,6 +36,7 @@ import { TransactionItem } from "~/components/transaction-item";
 import { mockTransactions as initialTransactions } from "~/lib/mock-data";
 import { cn } from "~/lib/utils";
 import { format } from "date-fns";
+import TransactionsLayout from "~/components/transactions/layout";
 
 // Define categories for each transaction type
 const INCOME_CATEGORIES = [
@@ -238,17 +239,7 @@ export default function TransactionsPage() {
   const actualCategories = getActualCategories();
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
-        <div className="flex items-center gap-2">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Transaction
-          </Button>
-        </div>
-      </div>
-
+    <TransactionsLayout>
       {/* Search and Filter Controls */}
       <Card>
         <CardContent className="pt-6">
@@ -298,8 +289,8 @@ export default function TransactionsPage() {
                           {activeTab === "all"
                             ? "Categories"
                             : activeTab.charAt(0).toUpperCase() +
-                              activeTab.slice(0, -1) +
-                              " Categories"}
+                            activeTab.slice(0, -1) +
+                            " Categories"}
                         </SelectItem>
                         {actualCategories.map((category) => (
                           <SelectItem key={category} value={category}>
@@ -515,6 +506,6 @@ export default function TransactionsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </TransactionsLayout>
   );
 }
