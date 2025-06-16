@@ -1,6 +1,10 @@
 ---
 name: "✨ Feature"
-labels: ["enhancement", "triage-needed"]
+about: An issue template to propose new features
+title: ''
+labels: enhancement
+assignees: ''
+
 ---
 
 # ✨ What problem are we solving?

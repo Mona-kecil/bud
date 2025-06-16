@@ -1,6 +1,10 @@
 ---
-name: "🧹 Tech-Debt / Refactor"
-labels: ["tech-debt"]
+name: "\U0001F9F9 Tech-Debt / Refactor"
+about: An issue template to clean up tech debt
+title: ''
+labels: ''
+assignees: ''
+
 ---
 
 # 🧹 Context

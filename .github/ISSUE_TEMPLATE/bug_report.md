@@ -1,6 +1,10 @@
 ---
-name: "🐞 Bug"
-labels: ["bug", "unplanned"]
+name: "\U0001F41E Bug"
+about: An issue template to report bugs.
+title: ''
+labels: bug
+assignees: ''
+
 ---
 
 # 🐞 Bug summary
@@ -10,6 +14,7 @@ _One sentence explaining the defect._
 1. …
 2. …
 3. …
+4. ....
 
 ## 🔍 Expected Result
 _What should happen._
