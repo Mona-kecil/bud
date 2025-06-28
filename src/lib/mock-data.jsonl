@@ -1,0 +1,18 @@
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Whole Foods Market","description":"Groceries","amount":89.47,"type":"expense","category":"groceries","date":"2025-05-09T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Netflix","description":"Monthly subscription","amount":15.99,"type":"expense","category":"entertainment","date":"2025-05-08T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Shell","description":"Gas station","amount":45.23,"type":"expense","category":"transportation","date":"2025-05-07T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Starbucks","description":"Coffee","amount":5.65,"type":"expense","category":"dining","date":"2025-05-07T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Amazon","description":"Electronics","amount":129.99,"type":"expense","category":"shopping","date":"2025-05-06T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Acme Corp","description":"Salary deposit","amount":2375.0,"type":"income","category":"income","date":"2025-05-05T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"AT&T","description":"Phone bill","amount":85.0,"type":"expense","category":"utilities","date":"2025-05-05T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"CVS Pharmacy","description":"Medications","amount":32.5,"type":"expense","category":"health","date":"2025-05-04T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"AMC Theaters","description":"Movie tickets","amount":28.5,"type":"expense","category":"entertainment","date":"2025-05-03T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Trader Joe's","description":"Groceries","amount":65.78,"type":"expense","category":"groceries","date":"2025-05-02T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Chevron","description":"Gas station","amount":48.92,"type":"expense","category":"transportation","date":"2025-05-01T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Chipotle","description":"Lunch","amount":12.85,"type":"expense","category":"dining","date":"2025-04-30T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Spotify","description":"Monthly subscription","amount":9.99,"type":"expense","category":"entertainment","date":"2025-04-29T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Uber","description":"Ride share","amount":24.5,"type":"expense","category":"transportation","date":"2025-04-28T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Target","description":"Household items","amount":78.35,"type":"expense","category":"shopping","date":"2025-04-27T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Vanguard","description":"Index fund investment","amount":500.0,"type":"investment","category":"investment","date":"2025-04-26T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Robinhood","description":"Stock purchase","amount":250.0,"type":"investment","category":"investment","date":"2025-04-20T00:00:00.000Z"}
+{"userId":"jd7ev8q1tm8061pkjhch37jfdd7j1nsz","merchantName":"Fidelity","description":"401(k) contribution","amount":350.0,"type":"investment","category":"investment","date":"2025-04-15T00:00:00.000Z"}

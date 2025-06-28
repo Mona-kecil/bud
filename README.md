@@ -23,6 +23,6 @@ Bud is a financial tracker app built with T3 Stack.
     - [x] Show spending by category as a pie chart
     - [x] Show savings rate trend over time
     - [x] Show income and expense growth over time
-    - [ ] Show recent transactions as a card
-    - [ ] Show budget overview summary
-    - [ ] Show accounts overview summary
+    - [x] Show recent transactions as a card
+    - [x] Show budget overview summary
+    - [x] Show accounts overview summary

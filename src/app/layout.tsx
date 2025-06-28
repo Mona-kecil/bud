@@ -5,6 +5,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "~/components/convex-client-provider";
 import StatsigClientProvider from "~/components/statsig-client-provider";
 import Sidebar from "~/components/sidebar";
+import { env } from "~/env";
+import { Toaster } from "~/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -20,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {process.env.NODE_ENV === "development" && (
+        {env.NODE_ENV === "development" && (
           <script
             crossOrigin="anonymous"
             src="//unpkg.com/react-scan/dist/auto.global.js"
@@ -34,6 +36,7 @@ export default function RootLayout({
             <StatsigClientProvider>
               <Sidebar>
                 <main className="flex-1 p-4 lg:p-6">{children}</main>
+                <Toaster />
               </Sidebar>
             </StatsigClientProvider>
           </ConvexClientProvider>

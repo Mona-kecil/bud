@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import {
-  CalendarIcon,
+  ArrowUpRight,
+  ArrowDownLeft,
   PlusCircle,
-  Search,
-  SlidersHorizontal,
+  CalendarIcon,
+  Ellipsis,
 } from "lucide-react";
-
-import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,8 +14,32 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { formatCurrency, formatDate } from "~/lib/utils";
+import TransactionsLayout from "~/components/transactions/layout";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "convex/_generated/api";
+import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -25,487 +47,656 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Calendar } from "~/components/ui/calendar";
+import { parseDate } from "chrono-node";
+import { memo, useCallback, useEffect, useState } from "react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { Calendar } from "~/components/ui/calendar";
-import { Label } from "~/components/ui/label";
-import { TransactionItem } from "~/components/transaction-item";
-import { mockTransactions as initialTransactions } from "~/lib/mock-data";
-import { cn } from "~/lib/utils";
-import { format } from "date-fns";
-import TransactionsLayout from "~/components/transactions/layout";
+import { toast } from "sonner";
+import { Skeleton } from "~/components/ui/skeleton";
+import type { Doc } from "convex/_generated/dataModel";
+import { motion } from "motion/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
-// Define categories for each transaction type
-const INCOME_CATEGORIES = [
-  "salary",
-  "freelance",
-  "investment-returns",
-  "bonus",
-  "rental-income",
-  "business-income",
-];
-const EXPENSE_CATEGORIES = [
-  "groceries",
-  "dining",
-  "transportation",
-  "utilities",
-  "entertainment",
-  "shopping",
-  "health",
-  "travel",
-  "insurance",
-  "education",
-];
-const INVESTMENT_CATEGORIES = [
-  "stocks",
-  "bonds",
-  "mutual-funds",
-  "etf",
-  "crypto",
-  "real-estate",
-  "retirement",
-];
+type Transaction = Doc<"transactions">;
+
+type DialogState = {
+  mode: "create" | "edit";
+  transaction?: Transaction;
+};
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState(initialTransactions);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [minAmount, setMinAmount] = useState("");
-  const [maxAmount, setMaxAmount] = useState("");
-  const [dateFrom, setDateFrom] = useState<Date>();
-  const [dateTo, setDateTo] = useState<Date>();
-  const [showFilters, setShowFilters] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
+  const transactionList = useQuery(api.transactions.getAllTransactions, {});
 
-  // Get categories based on active tab
-  const getAvailableCategories = () => {
-    switch (activeTab) {
-      case "income":
-        return INCOME_CATEGORIES;
-      case "expenses":
-        return EXPENSE_CATEGORIES;
-      case "investments":
-        return INVESTMENT_CATEGORIES;
-      case "all":
-      default:
-        return [
-          ...INCOME_CATEGORIES,
-          ...EXPENSE_CATEGORIES,
-          ...INVESTMENT_CATEGORIES,
-        ];
-    }
-  };
-
-  // Get actual categories from transactions based on tab
-  const getActualCategories = () => {
-    let filteredTransactions = transactions;
-
-    switch (activeTab) {
-      case "income":
-        filteredTransactions = transactions.filter((t) => t.type === "income");
-        break;
-      case "expenses":
-        filteredTransactions = transactions.filter((t) => t.type === "expense");
-        break;
-      case "investments":
-        filteredTransactions = transactions.filter(
-          (t) => t.type === "investment",
-        );
-        break;
-    }
-
-    return Array.from(new Set(filteredTransactions.map((t) => t.category)));
-  };
-
-  // Reset category filter when switching tabs if current category is not available
-  useEffect(() => {
-    const availableCategories = getActualCategories();
-    if (
-      categoryFilter !== "all" &&
-      !availableCategories.includes(categoryFilter)
-    ) {
-      setCategoryFilter("all");
-    }
-  }, [activeTab]);
-
-  const applyFilters = (transactionList: typeof transactions) => {
-    return transactionList.filter((transaction) => {
-      // Search filter
-      const matchesSearch =
-        transaction.description
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        transaction.merchant.toLowerCase().includes(searchTerm.toLowerCase());
-
-      // Category filter
-      const matchesCategory =
-        categoryFilter === "all" || transaction.category === categoryFilter;
-
-      // Amount filter
-      const matchesMinAmount =
-        !minAmount || transaction.amount >= Number.parseFloat(minAmount);
-      const matchesMaxAmount =
-        !maxAmount || transaction.amount <= Number.parseFloat(maxAmount);
-
-      // Date filter (simplified - in real app you'd parse the date strings properly)
-      const matchesDateFrom = !dateFrom || true; // Simplified for demo
-      const matchesDateTo = !dateTo || true; // Simplified for demo
-
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesMinAmount &&
-        matchesMaxAmount &&
-        matchesDateFrom &&
-        matchesDateTo
-      );
-    });
-  };
-
-  const filteredTransactions = applyFilters(transactions);
-  const incomeTransactions = applyFilters(
-    transactions.filter((t) => t.type === "income"),
-  );
-  const expenseTransactions = applyFilters(
-    transactions.filter((t) => t.type === "expense"),
-  );
-  const investmentTransactions = applyFilters(
-    transactions.filter((t) => t.type === "investment"),
-  );
-
-  const handleDeleteTransaction = (id: string) => {
-    setTransactions(transactions.filter((t) => t.id !== id));
-  };
-
-  const handleEditTransaction = (id: string, updatedTransaction: any) => {
-    setTransactions(
-      transactions.map((t) =>
-        t.id === id ? { ...t, ...updatedTransaction } : t,
-      ),
-    );
-  };
-
-  const clearFilters = () => {
-    setSearchTerm("");
-    setCategoryFilter("all");
-    setMinAmount("");
-    setMaxAmount("");
-    setDateFrom(undefined);
-    setDateTo(undefined);
-  };
-
-  // Get placeholder text based on active tab
-  const getAmountPlaceholder = () => {
-    switch (activeTab) {
-      case "income":
-        return { min: "Min income", max: "Max income" };
-      case "expenses":
-        return { min: "Min expense", max: "Max expense" };
-      case "investments":
-        return { min: "Min investment", max: "Max investment" };
-      default:
-        return { min: "Min amount", max: "Max amount" };
-    }
-  };
-
-  const TransactionList = ({
-    transactions: txList,
-  }: {
-    transactions: typeof transactions;
-  }) => (
-    <div className="space-y-4">
-      {txList.length > 0 ? (
-        txList.map((transaction) => (
-          <TransactionItem
-            key={transaction.id}
-            transaction={transaction}
-            onDelete={handleDeleteTransaction}
-            onEdit={handleEditTransaction}
-          />
-        ))
-      ) : (
-        <div className="text-muted-foreground py-6 text-center">
-          No {activeTab === "all" ? "" : activeTab} transactions found matching
-          your filters.
-        </div>
-      )}
-    </div>
-  );
-
-  const amountPlaceholders = getAmountPlaceholder();
-  const actualCategories = getActualCategories();
+  // Dialog state
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogState, setDialogState] = useState<DialogState>({
+    mode: "create",
+  });
 
   return (
     <TransactionsLayout>
-      {/* Search and Filter Controls */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <div className="relative flex-1">
-                <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-                <Input
-                  type="search"
-                  placeholder={`Search ${activeTab === "all" ? "transactions" : activeTab}...`}
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2"
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                Filters
-              </Button>
-            </div>
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
+        <div className="flex items-center gap-2">
+          <TransactionDialog
+            dialogState={dialogState}
+            setDialogState={setDialogState}
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setIsDialogOpen}
+          />
+        </div>
+      </div>
 
-            {showFilters && (
-              <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">
-                      {activeTab === "all"
-                        ? "Category"
-                        : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(0, -1)} Category`}
-                    </Label>
-                    <Select
-                      value={categoryFilter}
-                      onValueChange={setCategoryFilter}
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={`All ${activeTab === "all" ? "Categories" : activeTab.charAt(0).toUpperCase() + activeTab.slice(0, -1) + " Categories"}`}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">
-                          All{" "}
-                          {activeTab === "all"
-                            ? "Categories"
-                            : activeTab.charAt(0).toUpperCase() +
-                            activeTab.slice(0, -1) +
-                            " Categories"}
-                        </SelectItem>
-                        {actualCategories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category
-                              .split("-")
-                              .map(
-                                (word) =>
-                                  word.charAt(0).toUpperCase() + word.slice(1),
-                              )
-                              .join(" ")}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+      {/* Loading state */}
+      {transactionList === undefined && <LoadingState />}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="min-amount">{amountPlaceholders.min}</Label>
-                    <Input
-                      id="min-amount"
-                      type="text"
-                      inputMode="decimal"
-                      pattern="[0-9]*\.?[0-9]*"
-                      placeholder="0.00"
-                      value={minAmount}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d*\.?\d*$/.test(value)) {
-                          setMinAmount(value);
-                        }
-                      }}
-                    />
-                  </div>
+      {/* Empty state */}
+      {transactionList && transactionList.length === 0 && (
+        <EmptyState
+          setIsDialogOpen={setIsDialogOpen}
+          setDialogState={setDialogState}
+        />
+      )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="max-amount">{amountPlaceholders.max}</Label>
-                    <Input
-                      id="max-amount"
-                      type="text"
-                      inputMode="decimal"
-                      pattern="[0-9]*\.?[0-9]*"
-                      placeholder="999.99"
-                      value={maxAmount}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d*\.?\d*$/.test(value)) {
-                          setMaxAmount(value);
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Date Range</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !dateFrom && !dateTo && "text-muted-foreground",
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {dateFrom && dateTo
-                            ? `${format(dateFrom, "MMM d")} - ${format(dateTo, "MMM d, yyyy")}`
-                            : dateFrom
-                              ? `From ${format(dateFrom, "MMM d, yyyy")}`
-                              : dateTo
-                                ? `Until ${format(dateTo, "MMM d, yyyy")}`
-                                : "Select date range"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <div className="space-y-4 p-4">
-                          <div className="space-y-2">
-                            <div className="text-muted-foreground text-sm">
-                              {!dateFrom && !dateTo
-                                ? "Click a date to start selecting range"
-                                : dateFrom && !dateTo
-                                  ? "Click another date to complete range"
-                                  : "Date range selected"}
-                            </div>
-                            <Calendar
-                              mode="range"
-                              selected={
-                                dateFrom && dateTo
-                                  ? { from: dateFrom, to: dateTo }
-                                  : undefined
-                              }
-                              onSelect={(range) => {
-                                if (range?.from) {
-                                  setDateFrom(range.from);
-                                  setDateTo(range.to);
-                                } else {
-                                  setDateFrom(undefined);
-                                  setDateTo(undefined);
-                                }
-                              }}
-                              numberOfMonths={1}
-                            />
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setDateFrom(undefined);
-                                setDateTo(undefined);
-                              }}
-                              className="flex-1"
-                            >
-                              Clear
-                            </Button>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="flex items-end">
-                    <Button
-                      variant="outline"
-                      onClick={clearFilters}
-                      className="w-full"
-                    >
-                      Clear All Filters
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Transaction Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-4"
-      >
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">
-            All ({filteredTransactions.length})
-          </TabsTrigger>
-          <TabsTrigger value="income">
-            Income ({incomeTransactions.length})
-          </TabsTrigger>
-          <TabsTrigger value="expenses">
-            Expenses ({expenseTransactions.length})
-          </TabsTrigger>
-          <TabsTrigger value="investments">
-            Investments ({investmentTransactions.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Transactions</CardTitle>
-              <CardDescription>
-                View and manage all your financial transactions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TransactionList transactions={filteredTransactions} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="income" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Income Transactions</CardTitle>
-              <CardDescription>
-                Your income and earnings from various sources
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TransactionList transactions={incomeTransactions} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="expenses" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Expense Transactions</CardTitle>
-              <CardDescription>
-                Your spending and purchases across different categories
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TransactionList transactions={expenseTransactions} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="investments" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Investment Transactions</CardTitle>
-              <CardDescription>
-                Your investment activities and portfolio transactions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TransactionList transactions={investmentTransactions} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Transactions list */}
+      {transactionList && transactionList.length > 0 && (
+        <TransactionsList
+          transactionList={transactionList}
+          setDialogState={setDialogState}
+          setIsDialogOpen={setIsDialogOpen}
+        />
+      )}
     </TransactionsLayout>
   );
 }
+
+function TransactionDialog({
+  dialogState,
+  setDialogState,
+  isDialogOpen,
+  setIsDialogOpen,
+}: {
+  dialogState: DialogState;
+  setDialogState: (state: DialogState) => void;
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+}) {
+  // Date picker state
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [datePickerInputValue, setDatePickerInputValue] = useState("");
+  const [datePickerDate, setDatePickerDate] = useState<Date | undefined>();
+  const [datePickerMonth, setDatePickerMonth] = useState<Date | undefined>();
+
+  // Form state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const createTransaction = useMutation(api.transactions.createTransaction);
+  const updateTransaction = useMutation(api.transactions.updateTransaction);
+
+  const formSchema = z.object({
+    merchantName: z.string().min(1, { message: "Merchant name is required" }),
+    description: z.string().optional(),
+    amount: z.number().min(1, { message: "Amount must be greater than 0" }),
+    type: z.enum(["income", "expense", "investment"]),
+    category: z.string().optional(),
+    date: z.string(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      merchantName: "",
+      description: "",
+      amount: 0,
+      type: "expense" as const,
+      date: new Date().toISOString(),
+    },
+  });
+
+  // Autofill form when editing a specific transaction
+  useEffect(() => {
+    if (dialogState.mode === "edit" && dialogState.transaction) {
+      form.reset({
+        merchantName: dialogState.transaction.merchantName,
+        description: dialogState.transaction.description ?? "",
+        amount: dialogState.transaction.amount,
+        type: dialogState.transaction.type,
+        category: dialogState.transaction.category ?? "",
+        date: dialogState.transaction.date,
+      });
+
+      setDatePickerDate(new Date(dialogState.transaction.date));
+      setDatePickerInputValue(formatDate(dialogState.transaction.date));
+      setDatePickerMonth(new Date(dialogState.transaction.date));
+    } else if (dialogState.mode === "create") {
+      form.reset({
+        merchantName: "",
+        description: "",
+        amount: 0,
+        type: "expense" as const,
+        date: new Date().toISOString(),
+      });
+    }
+  }, [dialogState, form]);
+
+  const handleCreateTransaction = async (
+    values: z.infer<typeof formSchema>,
+  ) => {
+    try {
+      setIsSubmitting(true);
+
+      await createTransaction({ ...values });
+
+      setIsDialogOpen(false);
+      setDialogState({ mode: "create" });
+
+      toast.success("Transaction created successfully", {
+        position: "top-center",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to create transaction", {
+        position: "top-center",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateTransaction = async (
+    values: z.infer<typeof formSchema>,
+  ) => {
+    try {
+      setIsSubmitting(true);
+
+      if (!dialogState.transaction) {
+        throw new Error("Transaction not found");
+      }
+      await updateTransaction({
+        ...values,
+        transactionId: dialogState.transaction._id,
+      });
+
+      setIsDialogOpen(false);
+      setDialogState({ mode: "create" });
+
+      toast.success("Transaction updated successfully", {
+        position: "top-center",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update transaction", {
+        position: "top-center",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    const { date } = values;
+
+    // Check if date is valid
+    if (!date || !parseDate(date)) {
+      toast.error(
+        "Date is either invalid or empty, please select a valid date",
+        {
+          position: "top-center",
+        },
+      );
+      return;
+    }
+
+    if (dialogState.mode === "create") {
+      await handleCreateTransaction(values);
+    } else if (dialogState.mode === "edit") {
+      await handleUpdateTransaction(values);
+    }
+  };
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <Button
+          onClick={() => {
+            setDialogState({ mode: "create" });
+            setIsDialogOpen(true);
+          }}
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Transaction
+        </Button>
+      </DialogTrigger>
+      <DialogContent aria-describedby={undefined}>
+        <span className="sr-only">
+          <DialogHeader>
+            <DialogTitle>
+              {dialogState.mode === "create"
+                ? "Add Transaction"
+                : "Edit Transaction"}
+            </DialogTitle>
+          </DialogHeader>
+        </span>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
+            {/* Merchant Name */}
+            <FormField
+              control={form.control}
+              name="merchantName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Merchant Name
+                    <span
+                      className="text-red-500"
+                      aria-hidden="true"
+                      aria-label="required"
+                    >
+                      *
+                    </span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Merchant Name"
+                      {...field}
+                      required
+                      aria-required="true"
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Name of the merchant or business
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Description */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Description" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Short description of the transaction.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Amount */}
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="text"
+                      inputMode="numeric"
+                      // pattern="[0-9]*"
+                      value={
+                        field.value === 0 ? "" : formatCurrency(field.value)
+                      }
+                      onChange={(e) => {
+                        // Remove all non-digit characters (including "Rp", dots, commas, etc.)
+                        const raw = e.target.value.replace(/[^\d]/g, "");
+                        // Parse to number, fallback to 0 if empty
+                        const num = raw ? parseInt(raw, 10) : 0;
+                        field.onChange(num);
+                      }}
+                      min="0"
+                    />
+                  </FormControl>
+                  <FormDescription>Amount of the transaction.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Type */}
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="expense">Expense</SelectItem>
+                        <SelectItem value="income">Income</SelectItem>
+                        <SelectItem value="investment">Investment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormDescription>Type of the transaction.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Category */}
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Category" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Category of the transaction.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Date */}
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => {
+                // local helper to format date for display without instantly throwing error
+                function formatDateDisplay(date: Date | undefined) {
+                  if (!date) return "";
+                  return date.toLocaleDateString("id-ID", {
+                    dateStyle: "medium",
+                  });
+                }
+
+                return (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <div className="flex flex-col gap-3">
+                        <div className="relative flex gap-2">
+                          <Input
+                            id="date"
+                            value={datePickerInputValue}
+                            placeholder="Tomorrow or next week"
+                            className="bg-background pr-10"
+                            onChange={(e) => {
+                              setDatePickerInputValue(e.target.value);
+                              const parsed = parseDate(e.target.value);
+                              if (parsed) {
+                                setDatePickerDate(parsed);
+                                setDatePickerMonth(parsed);
+                                field.onChange(parsed.toISOString());
+                              } else {
+                                field.onChange(e.target.value);
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "ArrowDown") {
+                                e.preventDefault();
+                                setDatePickerOpen(true);
+                              }
+                            }}
+                          />
+                          <Popover
+                            open={datePickerOpen}
+                            onOpenChange={setDatePickerOpen}
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                id="date-picker"
+                                variant="ghost"
+                                className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
+                              >
+                                <CalendarIcon className="size-3.5" />
+                                <span className="sr-only">Select date</span>
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto overflow-hidden p-0"
+                              align="end"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={datePickerDate}
+                                captionLayout="dropdown"
+                                month={datePickerMonth}
+                                onMonthChange={setDatePickerMonth}
+                                onSelect={(selectedDate) => {
+                                  setDatePickerDate(selectedDate);
+                                  setDatePickerInputValue(
+                                    formatDateDisplay(selectedDate),
+                                  );
+                                  field.onChange(
+                                    selectedDate
+                                      ? selectedDate.toISOString()
+                                      : "",
+                                  );
+                                  setDatePickerOpen(false);
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="text-muted-foreground px-1 text-sm">
+                          Your transaction will be set on{" "}
+                          <span className="font-medium">
+                            {formatDateDisplay(datePickerDate)}
+                          </span>
+                          .
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormDescription>Date of the transaction.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+
+            <DialogFooter className="flex w-full justify-end gap-4">
+              <Button
+                variant="outline"
+                type="reset"
+                onClick={() => form.reset()}
+                disabled={isSubmitting}
+              >
+                Clear
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting
+                  ? "Submitting..."
+                  : dialogState.mode === "create"
+                    ? "Create"
+                    : "Update"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function LoadingState() {
+  return (
+    <TransactionsLayout>
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-screen w-full" />
+      </div>
+    </TransactionsLayout>
+  );
+}
+
+function EmptyState({
+  setIsDialogOpen,
+  setDialogState,
+}: {
+  setIsDialogOpen: (open: boolean) => void;
+  setDialogState: (state: DialogState) => void;
+}) {
+  return (
+    <TransactionsLayout>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="bg-muted mb-4 rounded-full p-4">
+            <PlusCircle className="text-muted-foreground h-8 w-8" />
+          </div>
+          <h3 className="mb-2 text-lg font-semibold">No transactions yet</h3>
+          <p className="text-muted-foreground mb-6 max-w-md">
+            Start tracking your finances by adding your first transaction.
+          </p>
+          <Button
+            onClick={() => {
+              setDialogState({ mode: "create" });
+              setIsDialogOpen(true);
+            }}
+            className="gap-2"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Add Your First Transaction
+          </Button>
+        </div>
+      </div>
+    </TransactionsLayout>
+  );
+}
+
+const TransactionsList = memo(
+  ({
+    transactionList,
+    setDialogState,
+    setIsDialogOpen,
+  }: {
+    transactionList: Transaction[];
+    setDialogState: (state: DialogState) => void;
+    setIsDialogOpen: (open: boolean) => void;
+  }) => {
+    const deleteTransaction = useMutation(api.transactions.deleteTransaction);
+
+    const handleEditTransaction = useCallback(
+      (transaction: Transaction) => {
+        setDialogState({ mode: "edit", transaction });
+        setIsDialogOpen(true);
+      },
+      [setDialogState, setIsDialogOpen],
+    );
+
+    const handleDeleteTransaction = useCallback(
+      async (transaction: Transaction) => {
+        try {
+          await deleteTransaction({ transactionId: transaction._id });
+          toast.success("Transaction deleted successfully", {
+            position: "top-center",
+          });
+        } catch (error) {
+          console.error(error);
+          toast.error("Failed to delete transaction", {
+            position: "top-center",
+          });
+        }
+      },
+      [deleteTransaction],
+    );
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>All Transactions</CardTitle>
+
+          <CardDescription>
+            View and manage all your financial transactions
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-2">
+          {transactionList.map((transaction) => (
+            <motion.div
+              className="border-border/50 hover:bg-muted flex cursor-pointer items-center gap-4 rounded-md border-b px-4 py-2"
+              key={transaction._id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+            >
+              {/* Icon */}
+              <div className="h-fit w-fit rounded-full border p-2">
+                {transaction.type === "income" ? (
+                  <ArrowDownLeft className="h-4 w-4 stroke-3 text-green-400" />
+                ) : transaction.type === "expense" ? (
+                  <ArrowUpRight className="h-4 w-4 stroke-3 text-red-400" />
+                ) : (
+                  <ArrowUpRight className="h-4 w-4 stroke-3 text-blue-400" />
+                )}
+              </div>
+
+              {/* Merchant Name and Description */}
+              <div className="flex flex-3/5 flex-col">
+                <p className="font-bold">{transaction.merchantName}</p>
+                <p className="text-muted-foreground text-sm">
+                  {transaction.description}
+                </p>
+              </div>
+
+              {/* Amount and Date */}
+              <div className="flex flex-col text-right">
+                <p className="font-bold">
+                  {formatCurrency(transaction.amount)}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {formatDate(transaction.date)}
+                </p>
+              </div>
+
+              {/* Menu button to edit and delete functionality */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Ellipsis className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => handleEditTransaction(transaction)}
+                    className="cursor-pointer"
+                  >
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleDeleteTransaction(transaction)}
+                    className="cursor-pointer"
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </motion.div>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  },
+);
+
+TransactionsList.displayName = "TransactionsList";
