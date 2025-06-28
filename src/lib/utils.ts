@@ -21,3 +21,21 @@ export const formatPercentage = (value: number) => {
     signDisplay: "exceptZero",
   }).format(value);
 };
+
+export const formatDate = (date: string | Date) => {
+  let dateObj: Date;
+  if (typeof date === "string") {
+    try {
+      dateObj = new Date(date);
+    } catch (error) {
+      console.error(error);
+      return "Invalid date";
+    }
+  } else {
+    dateObj = date;
+  }
+
+  return Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+  }).format(dateObj);
+};
