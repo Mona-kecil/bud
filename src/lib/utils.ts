@@ -5,37 +5,35 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const formatCurrency = (value: number) => {
-  return Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(value);
+const currencyFormatter = new Intl.NumberFormat("id-ID", {
+  style: "currency",
+  currency: "IDR",
+  minimumFractionDigits: 0,
+});
+
+const percentageFormatter = new Intl.NumberFormat("id-ID", {
+  style: "percent",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+  signDisplay: "exceptZero",
+});
+
+const dateFormatter = new Intl.DateTimeFormat("id-ID", {
+  dateStyle: "medium",
+});
+
+export const formatCurrency = (value: number): string => {
+  return currencyFormatter.format(value);
 };
 
-export const formatPercentage = (value: number) => {
-  return Intl.NumberFormat("id-ID", {
-    style: "percent",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-    signDisplay: "exceptZero",
-  }).format(value);
+export const formatPercentage = (value: number): string => {
+  return percentageFormatter.format(value);
 };
 
-export const formatDate = (date: string | Date) => {
-  let dateObj: Date;
-  if (typeof date === "string") {
-    try {
-      dateObj = new Date(date);
-    } catch (error) {
-      console.error(error);
-      return "Invalid date";
-    }
-  } else {
-    dateObj = date;
-  }
+export const formatDate = (date: string | Date): string => {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
 
-  return Intl.DateTimeFormat("id-ID", {
-    dateStyle: "medium",
-  }).format(dateObj);
+  if (isNaN(dateObj.getTime())) return "Invalid date";
+
+  return dateFormatter.format(dateObj);
 };
