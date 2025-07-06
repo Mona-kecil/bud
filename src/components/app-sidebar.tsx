@@ -10,11 +10,7 @@ import {
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarRail,
-} from "~/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarRail } from "~/components/ui/sidebar";
 
 // This is sample data.
 // TODO: Replace with actual user data

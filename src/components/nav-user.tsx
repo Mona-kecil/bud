@@ -1,10 +1,7 @@
 "use client";
 
 import { UserButton, useUser } from "@clerk/nextjs";
-import {
-  SidebarMenu,
-  SidebarMenuItem,
-} from "~/components/ui/sidebar";
+import { SidebarMenu, SidebarMenuItem } from "~/components/ui/sidebar";
 
 export function NavUser() {
   const user = useUser();
@@ -18,7 +15,7 @@ export function NavUser() {
             <span className="text-sm font-medium">
               {user.user?.fullName ?? "User"}
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {user.user?.emailAddresses[0]?.emailAddress ?? "No email"}
             </span>
           </div>
