@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import "~/styles/globals.css";
-import { Inter } from "next/font/google";
+import { Inter, Architects_Daughter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "~/components/convex-client-provider";
 import StatsigClientProvider from "~/components/statsig-client-provider";
-import Sidebar from "~/components/sidebar";
 import { env } from "~/env";
 import { Toaster } from "~/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
+
+const architectsDaughter = Architects_Daughter({
+  subsets: ["latin"],
+  weight: "400",
+});
 
 export const metadata: Metadata = {
   title: "Bud — Log expenses in 5 seconds",
@@ -31,14 +35,12 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${architectsDaughter.className}`}>
         <ClerkProvider>
           <ConvexClientProvider>
             <StatsigClientProvider>
-              <Sidebar>
-                <main className="min-h-dvh p-4 lg:p-6">{children}</main>
-                <Toaster />
-              </Sidebar>
+              <main className="min-h-dvh p-4 lg:p-6">{children}</main>
+              <Toaster />
             </StatsigClientProvider>
           </ConvexClientProvider>
         </ClerkProvider>
