@@ -15,6 +15,16 @@ import {
 import { mockTransactions } from "~/lib/mock-data";
 import { TransactionItem } from "~/components/transaction-item";
 
+type EditableTransaction = Partial<{
+  id: string;
+  date: string;
+  merchant: string;
+  description: string;
+  amount: number;
+  type: string;
+  category: string;
+}>;
+
 interface RecentTransactionsProps {
   showAll?: boolean;
 }
@@ -65,9 +75,7 @@ export function RecentTransactions({
     updatedTransaction: Partial<Transaction>,
   ) => {
     setTransactions(
-      transactions.map((t) =>
-        t.id === id ? { ...t, ...updatedTransaction } : t,
-      ),
+      transactions.map((t) => (t.id === id ? { ...t, ...updatedTransaction } : t)),
     );
   };
 

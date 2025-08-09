@@ -35,16 +35,26 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+type EditableTransaction = Partial<{
+  merchant: string;
+  description: string;
+  amount: number;
+  type: string;
+  category: string;
+}>;
+
+type TransactionShape = {
+  id: string;
+  date: string;
+  merchant: string;
+  description: string;
+  amount: number;
+  type: string;
+  category: string;
+};
+
 interface TransactionItemProps {
-  transaction: {
-    id: string;
-    date: string;
-    merchant: string;
-    description: string;
-    amount: number;
-    type: string;
-    category: string;
-  };
+  transaction: TransactionShape;
   onDelete: (id: string) => void;
   onEdit: (
     id: string,
@@ -59,7 +69,9 @@ export function TransactionItem({
 }: TransactionItemProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [editedTransaction, setEditedTransaction] = useState({
+  const [editedTransaction, setEditedTransaction] = useState<
+    EditableTransaction & Pick<TransactionShape, "id" | "date">
+  >({
     ...transaction,
   });
 
@@ -154,7 +166,7 @@ export function TransactionItem({
               </Label>
               <Input
                 id="merchant"
-                value={editedTransaction.merchant}
+                value={editedTransaction.merchant ?? ""}
                 onChange={(e) =>
                   setEditedTransaction({
                     ...editedTransaction,
@@ -170,7 +182,7 @@ export function TransactionItem({
               </Label>
               <Input
                 id="description"
-                value={editedTransaction.description}
+                value={editedTransaction.description ?? ""}
                 onChange={(e) =>
                   setEditedTransaction({
                     ...editedTransaction,
@@ -189,7 +201,7 @@ export function TransactionItem({
                 type="text"
                 inputMode="decimal"
                 pattern="[0-9]*\.?[0-9]*"
-                value={editedTransaction.amount}
+                value={editedTransaction.amount ?? 0}
                 onChange={(e) => {
                   const value = e.target.value;
                   // Allow only numbers and decimal point
@@ -211,7 +223,10 @@ export function TransactionItem({
               <Select
                 value={editedTransaction.type}
                 onValueChange={(value) =>
-                  setEditedTransaction({ ...editedTransaction, type: value })
+                  setEditedTransaction({
+                    ...editedTransaction,
+                    type: value,
+                  })
                 }
               >
                 <SelectTrigger className="col-span-3">
@@ -230,7 +245,7 @@ export function TransactionItem({
               </Label>
               <Input
                 id="category"
-                value={editedTransaction.category}
+                value={editedTransaction.category ?? ""}
                 onChange={(e) =>
                   setEditedTransaction({
                     ...editedTransaction,
