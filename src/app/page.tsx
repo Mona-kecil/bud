@@ -1,111 +1,84 @@
 "use client";
 
-import DashboardLayout from "~/components/dashboard/layout";
-import SummaryCards from "~/components/dashboard/summary-cards";
-import SummaryCharts from "~/components/dashboard/summary-charts";
-import RecentTransactionsCard from "~/components/dashboard/recent-transactions-card";
-import BudgetOverviewCard from "~/components/dashboard/budget-overview";
-import AccountsOverviewCard from "~/components/dashboard/accounts-overview-card";
+import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
+import Link from "next/link";
 
-const data = {
-  summaryCards: {
-    totalBalance: {
-      value: 12580.25,
-      change: 1245.12,
-    },
-    monthlyIncome: {
-      value: 4750.0,
-      change: 250.0,
-    },
-    monthlySpending: {
-      value: 2890.15,
-      change: 435.87,
-    },
-    savingsRate: {
-      value: 0.392,
-      change: -0.025,
-    },
-  },
-  summaryCharts: {
-    spendingByCategory: [
-      {
-        category: "Groceries",
-        valueInPercentage: "28%",
-        percentage: 0.28,
-      },
-      {
-        category: "Entertainment",
-        valueInPercentage: "18%",
-        percentage: 0.18,
-      },
-      {
-        category: "Transport",
-        valueInPercentage: "12%",
-        percentage: 0.12,
-      },
-      {
-        category: "Utilities",
-        valueInPercentage: "10%",
-        percentage: 0.1,
-      },
-      {
-        category: "Dining Out",
-        valueInPercentage: "15%",
-        percentage: 0.15,
-      },
-      {
-        category: "Healthcare",
-        valueInPercentage: "7%",
-        percentage: 0.07,
-      },
-      {
-        category: "Other",
-        valueInPercentage: "10%",
-        percentage: 0.1,
-      },
-    ],
-    savingsRateTrend: [
-      {
-        month: "Jan",
-        rate: 32,
-      },
-      {
-        month: "Feb",
-        rate: 28,
-      },
-      {
-        month: "Mar",
-        rate: 36,
-      },
-      {
-        month: "Apr",
-        rate: 42,
-      },
-      {
-        month: "May",
-        rate: 38,
-      },
-      {
-        month: "Jun",
-        rate: 45,
-      },
-    ],
-  },
-};
-
-export default function Dashboard() {
+export default function LandingPage() {
   return (
-    <DashboardLayout>
-      <SummaryCards data={data.summaryCards} />
-      <div className="space-y-4">
-        <SummaryCharts data={data.summaryCharts} />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <RecentTransactionsCard />
-          <BudgetOverviewCard />
+    <div className="mx-auto max-w-screen-sm space-y-10 p-6">
+      {/* Hero */}
+      <section className="text-center">
+        <h1 className="font-sans text-4xl leading-tight font-bold text-balance sm:text-5xl">
+          Tap. Type.{" "}
+          <span className="decoration-primary underline underline-offset-4">
+            Done.
+          </span>
+        </h1>
+        <p className="text-muted-foreground mt-3 text-base sm:text-lg">
+          Built for thumbs, not spreadsheets.
+        </p>
+
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <SignedOut>
+            <div className="flex items-center justify-center gap-3">
+              <SignInButton mode="redirect" forceRedirectUrl="/app" />
+              <SignUpButton mode="redirect" forceRedirectUrl="/app" />
+            </div>
+          </SignedOut>
+          <SignedIn>
+            <Link
+              href="/app"
+              className="rounded-md bg-emerald-600 px-4 py-2 text-white"
+            >
+              Enter app
+            </Link>
+          </SignedIn>
         </div>
-        <AccountsOverviewCard />
-      </div>
-    </DashboardLayout>
+      </section>
+
+      {/* Proof points */}
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <BadgeCard>Fast entry</BadgeCard>
+        <BadgeCard>Mobile‑first</BadgeCard>
+        <BadgeCard>PWA‑ready</BadgeCard>
+      </section>
+
+      {/* How it works */}
+      <section className="grid grid-cols-3 gap-3 text-center">
+        <Step label="Tap" />
+        <Step label="Type" />
+        <Step label="Done" />
+      </section>
+
+      {/* Footer */}
+      <footer className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
+        <a
+          href="https://twitter.com/2045humanoid"
+          target="_blank"
+          rel="noreferrer noopener"
+          className="underline underline-offset-4"
+        >
+          @2045humanoid
+        </a>
+      </footer>
+    </div>
+  );
+}
+
+function BadgeCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-card rounded-lg border p-3 text-sm shadow-sm">
+      {children}
+    </div>
+  );
+}
+
+function Step({ label }: { label: string }) {
+  return (
+    <div className="bg-card rounded-lg border p-4 shadow-sm">
+      <div className="mx-auto mb-2 h-8 w-8 rounded-full border" />
+      <div className="font-sans text-base font-semibold">{label}</div>
+    </div>
   );
 }
 

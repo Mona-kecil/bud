@@ -10,8 +10,8 @@ import { Toaster } from "~/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bud",
-  description: "A simple budget tracker app to replace my excel sheet.",
+  title: "Bud — Log expenses in 5 seconds",
+  description: "Tap. Type. Done. Built for thumbs, not spreadsheets.",
 };
 
 export default function RootLayout({
@@ -22,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://accounts.bud.kecil.dev" />
         {env.NODE_ENV === "development" && (
           <script
             crossOrigin="anonymous"
@@ -35,7 +36,7 @@ export default function RootLayout({
           <ConvexClientProvider>
             <StatsigClientProvider>
               <Sidebar>
-                <main className="flex-1 p-4 lg:p-6">{children}</main>
+                <main className="min-h-dvh p-4 lg:p-6">{children}</main>
                 <Toaster />
               </Sidebar>
             </StatsigClientProvider>
