@@ -75,7 +75,9 @@ export function RecentTransactions({
     updatedTransaction: Partial<Transaction>,
   ) => {
     setTransactions(
-      transactions.map((t) => (t.id === id ? { ...t, ...updatedTransaction } : t)),
+      transactions.map((t) =>
+        t.id === id ? { ...t, ...updatedTransaction } : t,
+      ),
     );
   };
 

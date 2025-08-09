@@ -6,6 +6,7 @@ import ConvexClientProvider from "~/components/convex-client-provider";
 import StatsigClientProvider from "~/components/statsig-client-provider";
 import { env } from "~/env";
 import { Toaster } from "~/components/ui/sonner";
+
 const inter = Inter({ subsets: ["latin"] });
 
 const architectsDaughter = Architects_Daughter({
