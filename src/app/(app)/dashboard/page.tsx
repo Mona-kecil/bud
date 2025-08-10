@@ -7,7 +7,6 @@
 // } from "~/components/ui/sidebar";
 
 export default function DashboardPage() {
-
   return (
     <div>
       <h1>Dashboard WIP</h1>

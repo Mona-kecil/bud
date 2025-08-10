@@ -13,6 +13,8 @@ import { Input } from "~/components/ui/input";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 
+// Note: FAB is currently unused; quick add is triggered by long-press on the center nav button.
+// Keeping this component for possible A/B tests or fallback.
 export default function QuickAddFab() {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
@@ -79,4 +81,4 @@ export default function QuickAddFab() {
       </Sheet>
     </>
   );
-} 
+}
