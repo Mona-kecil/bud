@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Prefer utility-first classes directly in JSX; keep className strings stable and readable.
+- Use semantic HTML and accessible patterns; avoid purely visual div wrappers when landmarks exist.
+- Avoid inline style when a Tailwind utility exists; use inline style only for dynamic CSS not representable by utilities.
+- Use @apply sparingly in dedicated CSS files for repeated patterns, not inside components.
+- If a cn/clsx helper exists, use it to compose conditional className values.
+- Keep design tokens consistent with tailwind.config; do not invent arbitrary values if a token exists.

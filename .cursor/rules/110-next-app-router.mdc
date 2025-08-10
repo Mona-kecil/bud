@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Default to Server Components. Add 'use client' only when React state/effects or browser APIs are required.
+- Data fetching: prefer server-side fetch in Server Components or Route Handlers.
+- Forms/actions: prefer Server Actions over client-only handlers when possible.
+- Avoid legacy Pages Router patterns. Keep file-based routing idiomatic for App Router.
