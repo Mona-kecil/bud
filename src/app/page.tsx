@@ -1,9 +1,26 @@
 "use client";
 
-import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  useAuth,
+} from "@clerk/nextjs";
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
+
+  // useEffect(() => {
+  //   if (isSignedIn) {
+  //     router.replace("/transactions");
+  //   }
+  // }, [isSignedIn, router]);
+
   return (
     <div className="mx-auto max-w-screen-sm space-y-10 p-6">
       {/* Hero */}
@@ -21,16 +38,16 @@ export default function LandingPage() {
         <div className="mt-6 flex items-center justify-center gap-3">
           <SignedOut>
             <div className="flex items-center justify-center gap-3">
-              <SignInButton mode="redirect" forceRedirectUrl="/app" />
-              <SignUpButton mode="redirect" forceRedirectUrl="/app" />
+              <SignInButton mode="redirect" forceRedirectUrl="/transactions" />
+              <SignUpButton mode="redirect" forceRedirectUrl="/transactions" />
             </div>
           </SignedOut>
           <SignedIn>
             <Link
-              href="/app"
+              href="/transactions"
               className="rounded-md bg-emerald-600 px-4 py-2 text-white"
             >
-              Enter app
+              Continue
             </Link>
           </SignedIn>
         </div>
