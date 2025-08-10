@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Do not modify generated files (e.g., convex/_generated/**) or lockfiles unless explicitly requested.
+- Avoid broad refactors across multiple files in a single step; prefer small, testable changes.
+- Do not change TypeScript, Tailwind, or Next.js config files unless the task requires it.
+- Maintain API contracts and public types when editing shared libraries; treat them as stable.
+- Preserve lint and formatting configs; do not rewrite unrelated sections.
+- When deleting code, confirm it is unused and provide a minimal rationale in the edit description.

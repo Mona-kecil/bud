@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+- Always propose a brief plan, then execute edits atomically.
+- Make the smallest viable change; avoid refactors unless requested or required.
+- Do not reformat unrelated code or reorder imports unless necessary for the change.
+- Preserve existing conventions, naming, and folder structure.
+- Use the project's package manager: pnpm.
+- After substantive code edits, prefer: pnpm typecheck, pnpm lint, pnpm build. Fix failures before proceeding.
+- Never write secrets into source; use env vars and existing config patterns.
+- Keep commit scopes small and meaningful.
+- When unsure about framework choice (server vs client, data layer, router), prefer the dedicated framework rules in this folder.

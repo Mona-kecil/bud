@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Component names: PascalCase; file naming separated with "-" character.
+- Props: define exported interface/type; avoid any; provide explicit return types for exported functions.
+- Hooks: call at top-level; obey exhaustive-deps; extract complex effects into helpers.
+- Events: type React handlers precisely (e.g., React.MouseEvent<HTMLButtonElement>).
+- Keep components focused; lift state up; prefer composition over prop drilling.
+- Prefer controlled inputs; memoize expensive derived values with useMemo and callbacks with useCallback when necessary.
