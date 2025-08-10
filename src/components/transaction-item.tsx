@@ -46,7 +46,7 @@ interface TransactionItemProps {
     category: string;
   };
   onDelete: (id: string) => void;
-  onEdit: (id: string, updatedTransaction: any) => void;
+  onEdit: (id: string, updatedTransaction: Partial<TransactionItemProps["transaction"]>) => void;
 }
 
 export function TransactionItem({

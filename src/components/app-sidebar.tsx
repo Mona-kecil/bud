@@ -16,34 +16,36 @@ import { Sidebar, SidebarContent, SidebarRail } from "~/components/ui/sidebar";
 // TODO: Replace with actual user data
 // TODO: Replace navigation with actual pages
 // TODO: Remove projects Section
+export const NAV_ITEMS = [
+  {
+    title: "Overview",
+    url: "/dashboard",
+    icon: DollarSign,
+  },
+  {
+    title: "Transactions",
+    url: "/transactions",
+    icon: CreditCard,
+  },
+  {
+    title: "Budgets",
+    url: "/budgets",
+    icon: PieChart,
+  },
+  {
+    title: "Goals",
+    url: "/goals",
+    icon: PiggyBank,
+  },
+  {
+    title: "Accounts",
+    url: "/accounts",
+    icon: Banknote,
+  },
+];
+
 const data = {
-  navMain: [
-    {
-      title: "Overview",
-      url: "/",
-      icon: DollarSign,
-    },
-    {
-      title: "Transactions",
-      url: "/transactions",
-      icon: CreditCard,
-    },
-    {
-      title: "Budgets",
-      url: "/budgets",
-      icon: PieChart,
-    },
-    {
-      title: "Goals",
-      url: "/goals",
-      icon: PiggyBank,
-    },
-    {
-      title: "Accounts",
-      url: "/accounts",
-      icon: Banknote,
-    },
-  ],
+  navMain: NAV_ITEMS,
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

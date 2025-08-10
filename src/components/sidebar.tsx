@@ -1,24 +1,28 @@
-import { AppSidebar } from "~/components/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "~/components/ui/sidebar";
 import { UserButton } from "@clerk/nextjs";
+import BottomNav from "~/components/bottom-nav";
+import QuickAddFab from "~/components/quick-add-fab";
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider defaultOpen={true} className="h-screen">
-      <AppSidebar />
-      <SidebarInset>
-        <header className="bg-accent sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex w-full items-center justify-between gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <UserButton />
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="relative min-h-dvh flex flex-col">
+      {/* Floating User Button respecting safe area top */}
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-end px-4"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <div className="pointer-events-auto py-2">
+          <UserButton />
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 p-4 pt-2 pb-28">{children}</div>
+
+      {/* Quick Add floating action button */}
+      <QuickAddFab />
+
+      {/* Bottom navigation */}
+      <BottomNav />
+    </div>
   );
 }
