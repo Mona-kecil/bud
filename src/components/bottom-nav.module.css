@@ -1,0 +1,33 @@
+/* Top border line with centered circular notch for FAB */
+.notch {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 32px; /* controls notch depth area */
+  pointer-events: none;
+}
+
+.notch::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: hsl(var(--border));
+}
+
+.notch::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;           /* notch diameter (>= FAB size) */
+  height: 64px;
+  top: -32px;            /* -0.5 * diameter */
+  border: 1px solid hsl(var(--border));
+  border-radius: 9999px;
+  background: hsl(var(--background));
+  /* Show only the lower half to create the dip */
+  clip-path: inset(50% 0 0 0);
+} 

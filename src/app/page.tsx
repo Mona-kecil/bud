@@ -5,21 +5,10 @@ import {
   SignedOut,
   SignInButton,
   SignUpButton,
-  useAuth,
 } from "@clerk/nextjs";
-import { useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
-  const { isSignedIn } = useAuth();
-  const router = useRouter();
-
-  // useEffect(() => {
-  //   if (isSignedIn) {
-  //     router.replace("/transactions");
-  //   }
-  // }, [isSignedIn, router]);
 
   return (
     <div className="mx-auto max-w-screen-sm space-y-10 p-6">
@@ -84,7 +73,7 @@ export default function LandingPage() {
 
 function BadgeCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-card rounded-lg border p-3 text-sm shadow-sm">
+    <div className="bg-card rounded-lg border p-3 text-sm shadow-sm text-center">
       {children}
     </div>
   );

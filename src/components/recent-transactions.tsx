@@ -19,10 +19,22 @@ interface RecentTransactionsProps {
   showAll?: boolean;
 }
 
+type Transaction = {
+  id: string;
+  date: string;
+  merchant: string;
+  description: string;
+  amount: number;
+  type: string;
+  category: string;
+};
+
 export function RecentTransactions({
   showAll = false,
 }: RecentTransactionsProps) {
-  const [transactions, setTransactions] = useState(mockTransactions);
+  const [transactions, setTransactions] = useState<Transaction[]>(
+    mockTransactions as Transaction[],
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
@@ -48,11 +60,12 @@ export function RecentTransactions({
     setTransactions(transactions.filter((t) => t.id !== id));
   };
 
-  const handleEditTransaction = (id: string, updatedTransaction: any) => {
+  const handleEditTransaction = (
+    id: string,
+    updatedTransaction: Partial<Transaction>,
+  ) => {
     setTransactions(
-      transactions.map((t) =>
-        t.id === id ? { ...t, ...updatedTransaction } : t,
-      ),
+      transactions.map((t) => (t.id === id ? { ...t, ...updatedTransaction } : t)),
     );
   };
 

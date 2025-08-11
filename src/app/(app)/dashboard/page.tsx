@@ -1,12 +1,19 @@
-import { AppSidebar } from "~/components/app-sidebar";
-import { Separator } from "~/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "~/components/ui/sidebar";
+// import { AppSidebar } from "~/components/app-sidebar";
+// import { Separator } from "~/components/ui/separator";
+// import {
+//   SidebarInset,
+//   SidebarProvider,
+//   SidebarTrigger,
+// } from "~/components/ui/sidebar";
 
-export default function Page() {
+export default function DashboardPage() {
+
+  return (
+    <div>
+      <h1>Dashboard WIP</h1>
+    </div>
+  );
+  /*
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -31,4 +38,5 @@ export default function Page() {
       </SidebarInset>
     </SidebarProvider>
   );
+*/
 }
