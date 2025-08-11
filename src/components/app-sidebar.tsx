@@ -23,14 +23,14 @@ export const NAV_ITEMS = [
     icon: DollarSign,
   },
   {
-    title: "Transactions",
-    url: "/transactions",
-    icon: CreditCard,
-  },
-  {
     title: "Budgets",
     url: "/budgets",
     icon: PieChart,
+  },
+  {
+    title: "Transactions",
+    url: "/transactions",
+    icon: CreditCard,
   },
   {
     title: "Goals",

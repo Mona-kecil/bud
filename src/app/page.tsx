@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-} from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 import Link from "next/link";
 
 export default function LandingPage() {
-
   return (
     <div className="mx-auto max-w-screen-sm space-y-10 p-6">
       {/* Hero */}
@@ -73,7 +67,7 @@ export default function LandingPage() {
 
 function BadgeCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-card rounded-lg border p-3 text-sm shadow-sm text-center">
+    <div className="bg-card rounded-lg border p-3 text-center text-sm shadow-sm">
       {children}
     </div>
   );
@@ -87,4 +81,3 @@ function Step({ label }: { label: string }) {
     </div>
   );
 }
-
