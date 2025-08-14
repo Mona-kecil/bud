@@ -38,6 +38,7 @@ export default function BottomNav() {
                 <Link
                   href={item.url}
                   {...centerLongPress()}
+                  onContextMenu={(e) => e.preventDefault()}
                   className={cn(
                     "text-muted-foreground hover:text-foreground group relative flex w-full flex-col items-center justify-center gap-1 rounded-md px-3 py-2 text-[11px] font-medium md:text-xs",
                     isActive && "text-foreground",
