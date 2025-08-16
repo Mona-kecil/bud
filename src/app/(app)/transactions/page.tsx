@@ -15,7 +15,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { formatCurrency, formatDate } from "~/lib/utils";
-import TransactionsLayout from "~/components/transactions/layout";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Button } from "~/components/ui/button";
@@ -83,9 +82,8 @@ export default function TransactionsPage() {
   });
 
   return (
-    <TransactionsLayout>
+    <>
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
         <div className="flex items-center gap-2">
           <TransactionDialog
             dialogState={dialogState}
@@ -115,7 +113,7 @@ export default function TransactionsPage() {
           setIsDialogOpen={setIsDialogOpen}
         />
       )}
-    </TransactionsLayout>
+    </>
   );
 }
 
@@ -542,11 +540,11 @@ function TransactionDialog({
 
 function LoadingState() {
   return (
-    <TransactionsLayout>
+    <>
       <div className="flex flex-col gap-4">
-        <Skeleton className="h-screen w-full" />
+        <Skeleton className="h-dvh w-full" />
       </div>
-    </TransactionsLayout>
+    </>
   );
 }
 
@@ -558,7 +556,7 @@ function EmptyState({
   setDialogState: (state: DialogState) => void;
 }) {
   return (
-    <TransactionsLayout>
+    <>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="bg-muted mb-4 rounded-full p-4">
@@ -580,7 +578,7 @@ function EmptyState({
           </Button>
         </div>
       </div>
-    </TransactionsLayout>
+    </>
   );
 }
 

@@ -39,8 +39,8 @@ export default function LandingPage() {
       {/* Proof points */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <BadgeCard>Fast entry</BadgeCard>
-        <BadgeCard>Mobile‑first</BadgeCard>
-        <BadgeCard>PWA‑ready</BadgeCard>
+        <BadgeCard>Mobile-first</BadgeCard>
+        <BadgeCard>PWA-ready</BadgeCard>
       </section>
 
       {/* How it works */}

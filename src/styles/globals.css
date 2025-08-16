@@ -161,4 +161,5 @@
 
 body {
   letter-spacing: var(--tracking-normal);
+  padding-top: env(safe-area-inset-top);
 }
