@@ -41,7 +41,7 @@ export default function QuickAddFab() {
     <>
       <div
         className="fixed inset-x-0 bottom-16 z-50 flex justify-center"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom))" }}
       >
         <Button
           aria-label="Quick add transaction"

@@ -14,7 +14,7 @@ const architectsDaughter = Architects_Daughter({
 });
 
 export const metadata: Metadata = {
-  title: "Bud — Log expenses in 5 seconds",
+  title: "Bud — Log expenses within seconds",
   description: "Tap. Type. Done. Built for thumbs, not spreadsheets.",
 };
 
@@ -26,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1 viewport-fit=cover" />
         <link rel="preconnect" href="https://accounts.bud.kecil.dev" />
         {env.NODE_ENV === "development" && (
           <script
@@ -39,7 +40,7 @@ export default function RootLayout({
         <ClerkProvider>
           <ConvexClientProvider>
             <StatsigClientProvider>
-              <main className="min-h-dvh p-4 lg:p-6">{children}</main>
+              <main className="min-h-dvh px-4">{children}</main>
               <Toaster />
             </StatsigClientProvider>
           </ConvexClientProvider>
