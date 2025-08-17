@@ -1,7 +1,7 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { Settings } from "lucide-react";
+import { Settings, UserCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
@@ -23,7 +23,7 @@ export default function TopNav() {
       {/* current page title*/}
       <h1 className="font-bold text-xl">{currentPageTitle}</h1>
       {/* user button */}
-      <UserButton />
+      <UserButton fallback={<UserCircle />} />
     </div>
   )
 }
