@@ -9,7 +9,7 @@
 export default function DashboardPage() {
   return (
     <div>
-      <h1>Dashboard WIP</h1>
+      <h1>WIP</h1>
     </div>
   );
   /*
