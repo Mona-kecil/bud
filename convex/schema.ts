@@ -18,9 +18,15 @@ export default defineSchema({
       v.literal("investment"),
     ),
     category: v.optional(v.string()),
+    categoryId: v.optional(v.id("budgets")), // Non-breaking new field, once everything moves here, remove the optional flag.
     date: v.string(),
   })
     .index("by_user_date", ["userId", "date"])
     .index("by_user_type", ["userId", "type"])
     .index("by_user_amount", ["userId", "amount"]),
+  budgets: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+  })
+    .index("by_user_name", ["userId", "name"]),
 });
