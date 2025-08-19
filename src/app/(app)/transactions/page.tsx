@@ -295,7 +295,7 @@ function TransactionDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 px-4"
+            className="space-y-4 px-4 overflow-y-scroll"
           >
             {/* Merchant Name */}
             <FormField
