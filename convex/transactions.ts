@@ -18,7 +18,7 @@ export const getAllTransactions = query({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token_identifier", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier),
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
       )
       .first();
     if (!user) {
