@@ -6,6 +6,8 @@ import {
   PlusCircle,
   CalendarIcon,
   Ellipsis,
+  ChevronsUpDownIcon,
+  CheckIcon,
 } from "lucide-react";
 import {
   Card,
@@ -14,18 +16,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { formatCurrency, formatDate } from "~/lib/utils";
+import { cn, formatCurrency, formatDate } from "~/lib/utils";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -64,6 +58,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "~/components/ui/drawer";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "~/components/ui/command";
 
 type Transaction = Doc<"transactions">;
 
@@ -137,15 +133,20 @@ function TransactionDialog({
   // Form state
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [categoryValue, setCategoryValue] = useState("");
+  const [categoryOpen, setCategoryOpen] = useState(false);
+
   const createTransaction = useMutation(api.transactions.createTransaction);
   const updateTransaction = useMutation(api.transactions.updateTransaction);
+
+  const getAvailableCategories = useQuery(api.budgets.getAvailableBudgets, {});
 
   const formSchema = z.object({
     merchantName: z.string().min(1, { message: "Merchant name is required" }),
     description: z.string().optional(),
     amount: z.number().min(1, { message: "Amount must be greater than 0" }),
     type: z.enum(["income", "expense", "investment"]),
-    category: z.string().optional(),
+    category: z.string().min(1, { message: "Category is required" }),
     date: z.string(),
   });
 
@@ -156,6 +157,7 @@ function TransactionDialog({
       description: "",
       amount: 0,
       type: "expense" as const,
+      category: "",
       date: new Date().toISOString(),
     },
   });
@@ -175,14 +177,17 @@ function TransactionDialog({
       setDatePickerDate(new Date(dialogState.transaction.date));
       setDatePickerInputValue(formatDate(dialogState.transaction.date));
       setDatePickerMonth(new Date(dialogState.transaction.date));
+      setCategoryValue(dialogState.transaction.category ?? "");
     } else if (dialogState.mode === "create") {
       form.reset({
         merchantName: "",
         description: "",
         amount: 0,
         type: "expense" as const,
+        category: "",
         date: new Date().toISOString(),
       });
+      setCategoryValue("");
     }
   }, [dialogState, form]);
 
@@ -262,8 +267,8 @@ function TransactionDialog({
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
+    <Drawer open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DrawerTrigger asChild>
         <Button
           onClick={() => {
             setDialogState({ mode: "create" });
@@ -273,21 +278,24 @@ function TransactionDialog({
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Transaction
         </Button>
-      </DialogTrigger>
-      <DialogContent aria-describedby={undefined}>
-        <span className="sr-only">
-          <DialogHeader>
-            <DialogTitle>
+      </DrawerTrigger>
+      <DrawerContent aria-describedby={undefined} className="w-full">
+          <DrawerHeader className="text-left">
+            <DrawerTitle>
               {dialogState.mode === "create"
                 ? "Add Transaction"
                 : "Edit Transaction"}
-            </DialogTitle>
-          </DialogHeader>
-        </span>
+            </DrawerTitle>
+            <DrawerDescription>
+              {dialogState.mode === "create"
+                ? "Add new transaction here. Click submit when you're done."
+                : "Modify existing transaction. Click submit when you're done."}
+            </DrawerDescription>
+          </DrawerHeader>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
+            className="space-y-4 px-4"
           >
             {/* Merchant Name */}
             <FormField
@@ -404,9 +412,54 @@ function TransactionDialog({
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>
+                    Category
+                    <span
+                      className="text-red-500"
+                      aria-hidden="true"
+                      aria-label="required"
+                    >
+                      *
+                    </span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Category" {...field} />
+                    <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" role="combobox" className="w-[200px] justify-between">
+                          {(field.value || categoryValue)
+                            ? getAvailableCategories?.find((cat) => cat.name === (field.value || categoryValue))?.name
+                            : "Select category..."}
+                          <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput placeholder="search category..." />
+                          <CommandList>
+                            <CommandEmpty>No Category found. Please create it first at `/budgets` page</CommandEmpty>
+                            <CommandGroup>
+                              {getAvailableCategories?.map(cat => (
+                                <CommandItem
+                                  key={cat.name}
+                                  value={cat.name}
+                                  onSelect={(currentValue) => {
+                                    const newValue = currentValue === categoryValue ? "" : currentValue;
+                                    setCategoryValue(newValue);
+                                    field.onChange(newValue);
+                                    setCategoryOpen(false);
+                                  }}>
+                                    <CheckIcon className={cn(
+                                      "mr-2 h-4 w-4",
+                                      (field.value || categoryValue) === cat.name ? "opacity-100" : "opacity-50"
+                                      )} />
+                                      {cat.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
                   <FormDescription>
                     Category of the transaction.
@@ -514,11 +567,11 @@ function TransactionDialog({
               }}
             />
 
-            <DialogFooter className="flex w-full justify-end gap-4">
+            <DrawerFooter className="flex w-full justify-end gap-4 pt-2">
               <Button
                 variant="outline"
                 type="reset"
-                onClick={() => form.reset()}
+                onClick={() => { form.reset(); setCategoryValue(""); }}
                 disabled={isSubmitting}
               >
                 Clear
@@ -530,11 +583,11 @@ function TransactionDialog({
                     ? "Create"
                     : "Update"}
               </Button>
-            </DialogFooter>
+            </DrawerFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   );
 }
 

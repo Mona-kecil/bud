@@ -34,3 +34,24 @@ So, if I comeback later to this repo, here's what I should do:
 - after migration complete and I like the flow:
   - remove old column
   - remove optional flag from new column
+
+# Back again
+## What I've done
+- Created new convex query `getAvailableBudgets`
+- Remade the dialog component as sheets
+- Broke the styling on desktop view, good job, but don't fix it yet.
+- Implemented the `getAvailableBudget` query. Strategy:
+  - Prefetch once when user opens a form
+- Shit I found better alternative to sheet component called drawer. But let's implement the combobox first then we can change it again into drawer component
+- Installed `command`, `popover`, `drawer` component from shadcn
+
+## Todos for tomorrow:
+- Learn how to make good autofill combobox here: https://ui.shadcn.com/docs/components/combobox
+- Change the `sheet` component with `drawer`
+- Work on `/budgets` page
+
+
+# Back again for the 3rd time
+- Created the combobox using popover component
+- Changed the sheet component with drawer component
+- 
