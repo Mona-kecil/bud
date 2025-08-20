@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { formatCategoryName } from "~/lib/utils";
 
 export const getAllTransactions = query({
   args: {
@@ -65,13 +66,30 @@ export const createTransaction = mutation({
       throw new Error("User not found");
     }
 
+    // Resolve categoryId from budgets if a category name is provided
+    let resolvedCategoryId = undefined;
+    let normalizedCategory: string | undefined = undefined;
+    if (args.category) {
+      normalizedCategory = formatCategoryName(args.category);
+      const budget = await ctx.db
+        .query("budgets")
+        .withIndex("by_user_name", (q) =>
+          q.eq("userId", user._id).eq("name", normalizedCategory!),
+        )
+        .first();
+      if (budget) {
+        resolvedCategoryId = budget._id;
+      }
+    }
+
     const transaction = await ctx.db.insert("transactions", {
       userId: user._id,
       merchantName: args.merchantName,
       description: args.description,
       amount: args.amount,
       type: args.type,
-      category: args.category,
+      category: normalizedCategory ?? args.category,
+      categoryId: resolvedCategoryId,
       date: args.date,
     });
 
@@ -112,14 +130,29 @@ export const updateTransaction = mutation({
       throw new Error("User not found");
     }
 
-    const newTransaction = await ctx.db.patch(args.transactionId, {
+    const patch: Record<string, unknown> = {
       merchantName: args.merchantName,
       description: args.description,
       amount: args.amount,
       type: args.type,
-      category: args.category,
       date: args.date,
-    });
+    };
+
+    if (args.category !== undefined) {
+      const normalized = formatCategoryName(args.category);
+      patch["category"] = normalized;
+      const budget = await ctx.db
+        .query("budgets")
+        .withIndex("by_user_name", (q) =>
+          q.eq("userId", user._id).eq("name", normalized),
+        )
+        .first();
+      if (budget) {
+        patch["categoryId"] = budget._id;
+      }
+    }
+
+    const newTransaction = await ctx.db.patch(args.transactionId, patch);
 
     return newTransaction;
   },

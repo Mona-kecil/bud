@@ -37,3 +37,7 @@ export const formatDate = (date: string | Date): string => {
 
   return dateFormatter.format(dateObj);
 };
+
+export const formatCategoryName = (name: string) => {
+  return name.trim().toLowerCase().split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+}
