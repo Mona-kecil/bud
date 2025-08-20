@@ -22,9 +22,10 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, D
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { PlusCircleIcon } from "lucide-react";
+import { Ellipsis, PlusCircleIcon } from "lucide-react";
 import { deleteTransaction } from "convex/transactions";
 import { Progress } from "~/components/ui/progress";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 
 type Budget = Doc<"budgets">;
 
@@ -553,8 +554,30 @@ const BudgetsList = memo(({
                 </div>
 
                 {/* the used percentage (right-aligned, fixed width) */}
-                <div className="shrink-0 w-16 text-right tabular-nums text-sm text-muted-foreground">
+                <div className="shrink-0 flex items-center justify-center w-16 text-right tabular-nums text-sm text-muted-foreground">
                   {pct.toFixed(1)}%
+                  {/* Dropdowns to add edit and delete functionality */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Ellipsis className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="absolute right-0">
+                    <DropdownMenuItem
+                      onClick={() => handleEditBudget(budget)}
+                      className="cursor-pointer"
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDeleteBudget(budget)}
+                      className="cursor-pointer"
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 </div>
               </div>
               <Progress value={pctClamped} />
