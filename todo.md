@@ -54,4 +54,23 @@ So, if I comeback later to this repo, here's what I should do:
 # Back again for the 3rd time
 - Created the combobox using popover component
 - Changed the sheet component with drawer component
-- 
+- Created another state to maintain the combobox
+  - when clear button is pressed, clears the state too
+  - when submit button is pressed, clears the state too
+- I also made sure that the component works fine
+
+### Working on budgets page
+- [x] Create convex function to create new budgets, accepting: `budget name` and `budget amount`
+  - [x] modify convex schema to store additional things:
+    - budget name
+    - budget amount
+  - [ ] calculate `used amount` on the fly, don't store inside db, I think it's a better approach so we don't get race condition when writing new trx too fast
+  - [ ] calculate `progress bar` on the fly too.
+- [ ] Set budget page layout to grid with 2 cols
+  - [ ] 2 cols for summary (Total budgeted, total used, remaining, budget health (high amount = bad health))
+
+- [ ] Remove dummy data
+- [ ] Set loading state, error state, null state, happy state
+
+# Back again for the 4th time
+- Fixed migration script where categoryId is still unset

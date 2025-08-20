@@ -615,7 +615,7 @@ function EmptyState({
           <div className="bg-muted mb-4 rounded-full p-4">
             <PlusCircle className="text-muted-foreground h-8 w-8" />
           </div>
-          <h3 className="mb-2 text-lg font-semibold">No transactions yet</h3>
+          `<h3 className="mb-2 text-lg font-semibold">No transactions yet</h3>
           <p className="text-muted-foreground mb-6 max-w-md">
             Start tracking your finances by adding your first transaction.
           </p>
@@ -628,7 +628,7 @@ function EmptyState({
           >
             <PlusCircle className="h-4 w-4" />
             Add Your First Transaction
-          </Button>
+          </Button>`
         </div>
       </div>
     </>

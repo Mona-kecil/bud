@@ -23,10 +23,13 @@ export default defineSchema({
   })
     .index("by_user_date", ["userId", "date"])
     .index("by_user_type", ["userId", "type"])
-    .index("by_user_amount", ["userId", "amount"]),
+    .index("by_user_amount", ["userId", "amount"])
+    // Efficiently aggregate spend by budget within a date range
+    .index("by_user_category_date", ["userId", "categoryId", "date"]),
   budgets: defineTable({
     userId: v.id("users"),
     name: v.string(),
+    amount: v.optional(v.number()),
   })
     .index("by_user_name", ["userId", "name"]),
 });
