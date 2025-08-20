@@ -74,3 +74,4 @@ So, if I comeback later to this repo, here's what I should do:
 
 # Back again for the 4th time
 - Fixed migration script where categoryId is still unset
+- Budgets page is now fully working, just missing some basic styling on the metrics part

@@ -22,7 +22,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, D
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Ellipsis, PlusCircleIcon } from "lucide-react";
+import { DollarSignIcon, Ellipsis, PlusCircleIcon } from "lucide-react";
 import { deleteTransaction } from "convex/transactions";
 import { Progress } from "~/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
@@ -32,96 +32,6 @@ type Budget = Doc<"budgets">;
 type DialogState = {
   mode: "create" | "edit";
   budget?: Budget;
-}
-
-function OldBudgetsPage() {
-  const budgetList = useQuery(api.budgets.getAvailableBudgets);
-
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const toISODate = (d: Date) => d.toISOString().slice(0, 10);
-  const spendByBudget = useQuery(api.budgets.getBudgetSpend, {
-    startDate: toISODate(startOfMonth),
-    endDate: toISODate(endOfMonth),
-  });
-
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [dialogState, setDialogState] = useState<DialogState>({
-    mode: "create",
-  });
-
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Budgeted
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(
-                mockBudgets.reduce((sum, budget) => sum + budget.limit, 0),
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(
-                mockBudgets.reduce((sum, budget) => sum + budget.spent, 0),
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Remaining</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(
-                mockBudgets.reduce((sum, budget) => sum + budget.limit, 0) -
-                  mockBudgets.reduce((sum, budget) => sum + budget.spent, 0),
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Budget Health</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Math.round(
-                (mockBudgets.reduce((sum, budget) => sum + budget.spent, 0) /
-                  mockBudgets.reduce((sum, budget) => sum + budget.limit, 0)) *
-                  100,
-              )}
-              %
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>All Budgets</CardTitle>
-          <CardDescription>
-            Track your spending against budget categories
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <BudgetOverview showAll={true} />
-        </CardContent>
-      </Card>
-    </div>
-  );
 }
 
 export default function BudgetsPage() {
@@ -176,46 +86,38 @@ function BudgetMetrics() {
   // budgetHealth: percentage of budget used (0% = unused, 100% = fully used, >100% = overspent)
   const budgetHealth = totalBudgeted > 0 ? (totalSpent / totalBudgeted) * 100 : 0;
 
+  const data = [
+    {
+      title: "Total Budgeted",
+      value: totalBudgeted,
+      description: "The total amount you have allocated across all your budgets.",
+    },
+    {
+      title: "Total Spent",
+      value: totalSpent,
+      description: "The total amount you have spent across all your budgets.",
+    },
+    {}
+    {
+      title: "Remaining",
+      value: remaining,
+      description: "The amount left to spend before reaching your total budget.",
+    },
+  ]
+
   return (
     <div className="grid gap-4 grid-cols-2 mb-4">
-      {/* Total Budgeted Card */}
-      <Card className="col-span-1 flex flex-col justify-between">
-        <CardHeader>
-          <CardTitle>Total Budgeted</CardTitle>
-          <CardDescription>
-            The total amount you have allocated across all your budgets.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <span className="text-2xl font-bold">{formatCurrency(totalBudgeted)}</span>
-        </CardContent>
-      </Card>
-
-      {/* Total Spent Card */}
-      <Card className="col-span-1 flex flex-col justify-between">
-        <CardHeader>
-          <CardTitle>Total Spent</CardTitle>
-          <CardDescription>
-            The total amount you have spent across all your budgets.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <span className="text-2xl font-bold">{formatCurrency(totalSpent)}</span>
-        </CardContent>
-      </Card>
-
-      {/* Remaining Card */}
-      <Card className="col-span-1 flex flex-col justify-between">
-        <CardHeader>
-          <CardTitle>Remaining</CardTitle>
-          <CardDescription>
-            The amount left to spend before reaching your total budget.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <span className="text-2xl font-bold">{formatCurrency(remaining)}</span>
-        </CardContent>
-      </Card>
+      {data.map((item) => (
+        <Card key={item.title} className="col-span-1 flex flex-col justify-between">
+          <CardHeader>
+            <CardTitle>{item.title}</CardTitle>
+            <CardDescription>{item.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <span className="text-2xl font-bold">{formatCurrency(item.value ?? 0)}</span>
+          </CardContent>
+        </Card>
+      ))}
 
       {/* Budget Health Card */}
       <Card className="col-span-1 flex flex-col justify-between">

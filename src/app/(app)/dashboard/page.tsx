@@ -7,11 +7,7 @@
 // } from "~/components/ui/sidebar";
 
 export default function DashboardPage() {
-  return (
-    <div>
-      <h1>WIP</h1>
-    </div>
-  );
+  return <div>Coming soon!</div>;
   /*
   return (
     <SidebarProvider>
