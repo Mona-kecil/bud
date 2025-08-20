@@ -13,7 +13,7 @@ export const getAllTransactions = query({
     const identity = await ctx.auth.getUserIdentity();
 
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -52,7 +52,7 @@ export const createTransaction = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -116,7 +116,7 @@ export const updateTransaction = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -165,7 +165,7 @@ export const deleteTransaction = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -185,7 +185,7 @@ export const deleteTransaction = mutation({
     }
 
     if (transaction.userId !== user._id) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     await ctx.db.delete(args.transactionId);

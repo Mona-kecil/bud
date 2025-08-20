@@ -5,7 +5,7 @@ export const store = mutation({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
