@@ -7,7 +7,7 @@ export const getAvailableBudgets = query({
     const identity = await ctx.auth.getUserIdentity();
 
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -82,7 +82,7 @@ export const updateBudget = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -96,7 +96,29 @@ export const updateBudget = mutation({
       throw new Error("User not found");
     }
 
+    const budget = await ctx.db.get(args.budgetId);
+
+    if (!budget) {
+      throw new Error("Budget not found");
+    }
+
+    if (budget.userId !== user._id) {
+      throw new Error("Unauthorized");
+    }
+
     const normalizedName = formatCategoryName(args.name);
+
+    // Check existing name
+    const existingBudget = await ctx.db
+      .query("budgets")
+      .withIndex("by_user_name", (q) =>
+        q.eq("userId", user._id).eq("name", normalizedName)
+      )
+      .first();
+
+    if (existingBudget) {
+      throw new Error("Budget name is already used");
+    }
 
     const newBudget = await ctx.db.patch(args.budgetId, {
       name: normalizedName,
@@ -114,7 +136,7 @@ export const deleteBudget = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -131,7 +153,7 @@ export const deleteBudget = mutation({
     const budget = await ctx.db.get(args.budgetId);
     if (!budget) throw new Error("Budget not found");
 
-    if (budget.userId !== user._id) throw new Error("Unauthorized access");
+    if (budget.userId !== user._id) throw new Error("Unauthorized");
 
     await ctx.db.delete(args.budgetId);
 
@@ -144,7 +166,7 @@ export const getBudgetSpend = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -194,7 +216,7 @@ export const getTotalBudgets = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
@@ -215,10 +237,7 @@ export const getTotalBudgets = query({
           .eq("userId", user._id)
       ).collect();
 
-    const totalBudgets = budgets.reduce(
-      (sum, budgets) => sum + budgets.amount!,
-      0,
-    );
+    const totalBudgets = budgets.reduce((sum, budget) => sum + budget.amount!, 0);
 
     return totalBudgets;
   }
@@ -230,7 +249,7 @@ export const getTotalSpent = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthorized access");
+      throw new Error("Unauthorized");
     }
 
     const user = await ctx.db
