@@ -132,22 +132,17 @@ export default function BudgetsPage() {
   const [dialogState, setDialogState] = useState<DialogState>({
     mode: "create",
   });
+
+  // Loading state
+  if (budgetList === undefined) return <LoadingState />;
+
+  // Empty state
+  if (budgetList && budgetList.length === 0) return <EmptyState setIsDialogOpen={setIsDialogOpen} setDialogState={setDialogState} />
+
   return (
     <>
       <BudgetMetrics />
 
-      {/* Loading state */}
-      {budgetList === undefined && <LoadingState />}
-
-      {/* Empty state */}
-      {budgetList && budgetList.length === 0 && (
-        <EmptyState
-          setIsDialogOpen={setIsDialogOpen}
-          setDialogState={setDialogState}
-        />
-      )}
-
-      {/* Budgets list */}
       {budgetList && budgetList.length > 0 && (
         <BudgetsList
           budgetList={budgetList}

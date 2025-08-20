@@ -64,13 +64,13 @@ So, if I comeback later to this repo, here's what I should do:
   - [x] modify convex schema to store additional things:
     - budget name
     - budget amount
-  - [ ] calculate `used amount` on the fly, don't store inside db, I think it's a better approach so we don't get race condition when writing new trx too fast
-  - [ ] calculate `progress bar` on the fly too.
-- [ ] Set budget page layout to grid with 2 cols
-  - [ ] 2 cols for summary (Total budgeted, total used, remaining, budget health (high amount = bad health))
+  - [x] calculate `used amount` on the fly, don't store inside db, I think it's a better approach so we don't get race condition when writing new trx too fast
+  - [x] calculate `progress bar` on the fly too.
+- [x] Set budget page layout to grid with 2 cols
+  - [x] 2 cols for summary (Total budgeted, total used, remaining, budget health (high amount = bad health))
 
-- [ ] Remove dummy data
-- [ ] Set loading state, error state, null state, happy state
+- [x] Remove dummy data
+- [x] Set loading state, error state, null state, happy state
 
 # Back again for the 4th time
 - Fixed migration script where categoryId is still unset
