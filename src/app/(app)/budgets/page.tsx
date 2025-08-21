@@ -7,8 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { BudgetOverview } from "~/components/budget-overview";
-import { mockBudgets } from "~/lib/mock-data";
 import { formatCurrency } from "~/lib/utils";
 import type { Doc } from "convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
@@ -20,9 +18,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { DollarSignIcon, Ellipsis, PlusCircleIcon } from "lucide-react";
+import { Ellipsis, PlusCircleIcon } from "lucide-react";
 import { deleteTransaction } from "convex/transactions";
 import { Progress } from "~/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
@@ -74,12 +72,6 @@ export default function BudgetsPage() {
 }
 
 function BudgetMetrics() {
-  // Total budgeted
-  // Total spent
-  // Remaining
-  // Budget health
-
-  // Calculate on server, client as presentation layer only
   const totalBudgeted = useQuery(api.budgets.getTotalBudgets, {})!;
   const totalSpent = useQuery(api.budgets.getTotalSpent, {})!;
   const remaining = totalBudgeted - totalSpent;
@@ -97,7 +89,6 @@ function BudgetMetrics() {
       value: totalSpent,
       description: "The total amount you have spent across all your budgets.",
     },
-    {}
     {
       title: "Remaining",
       value: remaining,
@@ -106,15 +97,15 @@ function BudgetMetrics() {
   ]
 
   return (
-    <div className="grid gap-4 grid-cols-2 mb-4">
+    <div className="grid gap-4 grid-cols-1 mb-4">
       {data.map((item) => (
         <Card key={item.title} className="col-span-1 flex flex-col justify-between">
           <CardHeader>
-            <CardTitle>{item.title}</CardTitle>
-            <CardDescription>{item.description}</CardDescription>
+            <CardTitle className="text-base">{item.title}</CardTitle>
+            <CardDescription className="text-xs">{item.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{formatCurrency(item.value ?? 0)}</span>
+            <span className={`text-lg font-bold ${item.value > 0 ? "text-primary" : "text-destructive"}`}>{formatCurrency(item.value ?? 0)}</span>
           </CardContent>
         </Card>
       ))}
@@ -122,14 +113,14 @@ function BudgetMetrics() {
       {/* Budget Health Card */}
       <Card className="col-span-1 flex flex-col justify-between">
         <CardHeader>
-          <CardTitle>Budget Health</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-base">Budget Health</CardTitle>
+          <CardDescription className="text-xs">
             Percentage of your total budget that has been spent.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center gap-4">
-            <div className="text-2xl font-bold">
+            <div className={`font-bold self-start text-lg ${budgetHealth > 100 ? "text-destructive" : "text-primary"}`}>
               {budgetHealth.toFixed(1)}%
             </div>
             <div className="w-full h-3 bg-muted rounded">
@@ -298,7 +289,7 @@ function BudgetDialog({
               name="name"
               render={({field}) => (
                 <FormItem>
-                  <FormLabel>
+                  <FormLabel className="text-sm">
                     Budget Name
                     <span className="text-destructive" aria-hidden="true" aria-label="required">*</span>
                   </FormLabel>
@@ -320,7 +311,7 @@ function BudgetDialog({
               name="amount"
               render={({field}) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel className="text-sm">Amount</FormLabel>
                   <FormControl>
                     <Input 
                       {...field}
@@ -435,8 +426,8 @@ const BudgetsList = memo(({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>All Budgets</CardTitle>
-        <CardDescription>Track your spending against budget categories</CardDescription>
+        <CardTitle className="text-base">All Budgets</CardTitle>
+        <CardDescription className="text-xs">Track your spending against budget categories</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {budgetList.map((budget) => {
@@ -449,14 +440,14 @@ const BudgetsList = memo(({
               <div className="flex items-center justify-between gap-4">
                 {/* name, amount, spent */}
                 <div className="flex min-w-0 flex-col">
-                  <div className="truncate font-medium">{budget.name}</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="truncate font-medium text-sm">{budget.name}</div>
+                  <div className="text-xs text-muted-foreground">
                     {formatCurrency(spent)} / {formatCurrency(amount)}
                   </div>
                 </div>
 
                 {/* the used percentage (right-aligned, fixed width) */}
-                <div className="shrink-0 flex items-center justify-center w-16 text-right tabular-nums text-sm text-muted-foreground">
+                <div className="shrink-0 flex items-center justify-center w-16 text-right tabular-nums text-xs text-muted-foreground">
                   {pct.toFixed(1)}%
                   {/* Dropdowns to add edit and delete functionality */}
                 <DropdownMenu>
