@@ -13,6 +13,7 @@ import { mockGoals } from "~/lib/mock-data";
 import { formatCurrency } from "~/lib/utils";
 
 export default function GoalsPage() {
+  return <div>Coming soon!</div>;
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
