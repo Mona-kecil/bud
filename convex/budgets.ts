@@ -108,12 +108,13 @@ export const updateBudget = mutation({
 
     const normalizedName = formatCategoryName(args.name);
 
-    // Check existing name
+    // Check existing name, excluding the current budget
     const existingBudget = await ctx.db
       .query("budgets")
       .withIndex("by_user_name", (q) =>
         q.eq("userId", user._id).eq("name", normalizedName)
       )
+      .filter((b) => b.neq(b.field("_id"), args.budgetId))
       .first();
 
     if (existingBudget) {
@@ -286,4 +287,4 @@ export const getTotalSpent = query({
 
     return total;
   }
-})
+});
