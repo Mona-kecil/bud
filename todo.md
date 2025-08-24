@@ -75,3 +75,13 @@ So, if I comeback later to this repo, here's what I should do:
 # Back again for the 4th time
 - Fixed migration script where categoryId is still unset
 - Budgets page is now fully working, just missing some basic styling on the metrics part
+
+# Back again for the 5th time
+- Completed the budget page, fixed the font styling issue on metrics part. Something still missing tho:
+  - Card too small, remove some margin / padding
+  - Left and right margin is too big
+  - Overspent on each budget is not implemented
+
+### Working on budgets page
+- [ ] Implement overspent on each budget card
+- [ ] 

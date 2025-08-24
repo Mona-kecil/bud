@@ -37,8 +37,9 @@ function BudgetOverview() {
   return (
     <div className="space-y-4">
       {budgets.map((budget) => {
-        const percentage = Math.min(100, (budget.spent / budget.limit) * 100);
-        const isOverBudget = budget.spent > budget.limit;
+        const pct = (budget.spent / budget.limit) * 100;
+        const percentage = Math.min(100, Math.max(pct, 0));
+        const isOverBudget = pct >= 100;
 
         return (
           <div key={budget.id} className="space-y-1">
@@ -58,8 +59,12 @@ function BudgetOverview() {
             </div>
             <Progress
               value={percentage}
-              className={`h-2 ${isOverBudget ? "bg-red-100" : ""}`}
+              className="h-2"
+              indicatorClassName={isOverBudget ? "bg-destructive" : undefined}
             />
+            {isOverBudget && (
+              <div className="text-destructive text-xs">Overspent</div>
+            )}
           </div>
         );
       })}
