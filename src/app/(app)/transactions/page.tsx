@@ -448,12 +448,12 @@ function TransactionDialog({
                             <CommandGroup>
                               {getAvailableCategories?.map(cat => (
                                 <CommandItem
-                                  key={String(cat._id)}
-                                  value={String(cat._id)}
+                                  key={cat._id}
+                                  value={cat.name}
                                   onSelect={(currentValue: string) => {
                                     const newValue = currentValue === categoryValue ? "" : currentValue;
                                     setCategoryValue(newValue);
-                                    field.onChange(newValue);
+                                    field.onChange(cat._id);
                                     setCategoryOpen(false);
                                   }}>
                                     <CheckIcon className={cn(
