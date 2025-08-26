@@ -9,7 +9,7 @@ export default defineSchema({
   }).index("by_token_identifier", ["tokenIdentifier"]),
   transactions: defineTable({
     userId: v.id("users"),
-    merchantName: v.optional(v.string()),
+    merchantName: v.string(),
     description: v.optional(v.string()),
     amount: v.number(),
     type: v.union(
@@ -17,8 +17,7 @@ export default defineSchema({
       v.literal("expense"),
       v.literal("investment"),
     ),
-    category: v.optional(v.string()),
-    categoryId: v.optional(v.id("budgets")), // Non-breaking new field, once everything moves here, remove the optional flag.
+    categoryId: v.id("budgets"),
     date: v.string(),
   })
     .index("by_user_date", ["userId", "date"])

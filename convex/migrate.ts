@@ -2,8 +2,6 @@ import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
 import { formatCategoryName } from "~/lib/utils";
 
-
-
 export const backfillCategoriesTable = internalMutation({
   args: {},
   returns: v.object({
@@ -45,7 +43,7 @@ export const backfillCategoriesTable = internalMutation({
           targetBudgetId = await ctx.db.insert("budgets", {
             userId: trx.userId,
             name: categoryName,
-            amount: 100,
+            amount: 0,
           });
           createdCount++;
         }
@@ -67,4 +65,23 @@ export const backfillCategoriesTable = internalMutation({
       throw error;
     }
   },
+});
+
+export const deleteCategoryField = internalMutation({
+  args: {},
+  returns: v.object({
+    success: v.boolean(),
+  }),
+  handler: async (ctx) => {
+    const transactions = await ctx.db.query("transactions").collect();
+
+    console.log(`Starting category field deletion for ${transactions.length} transactions`);
+
+    for (const trx of transactions) {
+      await ctx.db.patch(trx._id, { category: undefined });
+    }
+
+    console.log(`Category field deletion completed`);
+    return { success: true };
+  }
 });

@@ -38,7 +38,7 @@ export const getAllTransactions = query({
 
 export const createTransaction = mutation({
   args: {
-    merchantName: v.optional(v.string()),
+    merchantName: v.string(),
     description: v.optional(v.string()),
     amount: v.number(),
     type: v.union(
@@ -46,7 +46,7 @@ export const createTransaction = mutation({
       v.literal("expense"),
       v.literal("investment"),
     ),
-    category: v.optional(v.string()),
+    categoryId: v.id("budgets"),
     date: v.string(),
   },
   handler: async (ctx, args) => {
@@ -66,30 +66,13 @@ export const createTransaction = mutation({
       throw new Error("User not found");
     }
 
-    // Resolve categoryId from budgets if a category name is provided
-    let resolvedCategoryId = undefined;
-    let normalizedCategory: string | undefined = undefined;
-    if (args.category) {
-      normalizedCategory = formatCategoryName(args.category);
-      const budget = await ctx.db
-        .query("budgets")
-        .withIndex("by_user_name", (q) =>
-          q.eq("userId", user._id).eq("name", normalizedCategory!),
-        )
-        .first();
-      if (budget) {
-        resolvedCategoryId = budget._id;
-      }
-    }
-
     const transaction = await ctx.db.insert("transactions", {
       userId: user._id,
       merchantName: args.merchantName,
       description: args.description,
       amount: args.amount,
       type: args.type,
-      category: normalizedCategory ?? args.category,
-      categoryId: resolvedCategoryId,
+      categoryId: args.categoryId,
       date: args.date,
     });
 
@@ -100,18 +83,16 @@ export const createTransaction = mutation({
 export const updateTransaction = mutation({
   args: {
     transactionId: v.id("transactions"),
-    merchantName: v.optional(v.string()),
+    merchantName: v.string(),
     description: v.optional(v.string()),
-    amount: v.optional(v.number()),
-    type: v.optional(
-      v.union(
-        v.literal("income"),
-        v.literal("expense"),
-        v.literal("investment"),
-      ),
+    amount: v.number(),
+    type: v.union(
+      v.literal("income"),
+      v.literal("expense"),
+      v.literal("investment"),
     ),
-    category: v.optional(v.string()),
-    date: v.optional(v.string()),
+    categoryId: v.id("budgets"),
+    date: v.string(),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -130,27 +111,20 @@ export const updateTransaction = mutation({
       throw new Error("User not found");
     }
 
+    const transaction = await ctx.db.get(args.transactionId);
+
+    if (transaction?.userId !== user._id) {
+      throw new Error("Unauthorized");
+    }
+
     const patch: Record<string, unknown> = {
       merchantName: args.merchantName,
       description: args.description,
       amount: args.amount,
       type: args.type,
       date: args.date,
+      categoryId: args.categoryId,
     };
-
-    if (args.category !== undefined) {
-      const normalized = formatCategoryName(args.category);
-      patch["category"] = normalized;
-      const budget = await ctx.db
-        .query("budgets")
-        .withIndex("by_user_name", (q) =>
-          q.eq("userId", user._id).eq("name", normalized),
-        )
-        .first();
-      if (budget) {
-        patch["categoryId"] = budget._id;
-      }
-    }
 
     const newTransaction = await ctx.db.patch(args.transactionId, patch);
 
