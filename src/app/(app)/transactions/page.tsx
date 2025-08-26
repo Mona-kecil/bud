@@ -50,7 +50,7 @@ import {
 } from "~/components/ui/popover";
 import { toast } from "sonner";
 import { Skeleton } from "~/components/ui/skeleton";
-import type { Doc } from "convex/_generated/dataModel";
+import type { Doc, Id } from "convex/_generated/dataModel";
 import { motion } from "motion/react";
 import {
   DropdownMenu,
@@ -133,7 +133,7 @@ function TransactionDialog({
   // Form state
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [categoryValue, setCategoryValue] = useState("");
+  const [categoryValue, setCategoryValue] = useState<string>("");
   const [categoryOpen, setCategoryOpen] = useState(false);
 
   const createTransaction = useMutation(api.transactions.createTransaction);
@@ -146,7 +146,7 @@ function TransactionDialog({
     description: z.string().optional(),
     amount: z.number().min(1, { message: "Amount must be greater than 0" }),
     type: z.enum(["income", "expense", "investment"]),
-    category: z.string().min(1, { message: "Category is required" }),
+    categoryId: z.string().min(1, { message: "Category is required" }),
     date: z.string(),
   });
 
@@ -157,7 +157,7 @@ function TransactionDialog({
       description: "",
       amount: 0,
       type: "expense" as const,
-      category: "",
+      categoryId: getAvailableCategories?.[0]?._id ?? "",
       date: new Date().toISOString(),
     },
   });
@@ -170,24 +170,31 @@ function TransactionDialog({
         description: dialogState.transaction.description ?? "",
         amount: dialogState.transaction.amount,
         type: dialogState.transaction.type,
-        category: dialogState.transaction.category ?? "",
+        categoryId: String(dialogState.transaction.categoryId ?? ""),
         date: dialogState.transaction.date,
       });
 
       setDatePickerDate(new Date(dialogState.transaction.date));
       setDatePickerInputValue(formatDate(dialogState.transaction.date));
       setDatePickerMonth(new Date(dialogState.transaction.date));
-      setCategoryValue(dialogState.transaction.category ?? "");
+      setCategoryValue(String(dialogState.transaction.categoryId ?? ""));
     } else if (dialogState.mode === "create") {
+      const now = new Date();
+      const nowIso = now.toISOString();
       form.reset({
         merchantName: "",
         description: "",
         amount: 0,
         type: "expense" as const,
-        category: "",
-        date: new Date().toISOString(),
+        categoryId: "",
+        date: nowIso,
       });
-      setCategoryValue("");
+      // Set date-related UI to "now"
+      setDatePickerDate(now);
+      setDatePickerInputValue(formatDate(nowIso));
+      setDatePickerMonth(now);
+      // Reset category selection; a separate effect will set the first available once categories load
+      setCategoryValue(getAvailableCategories?.[0]?._id ?? "");
     }
   }, [dialogState, form]);
 
@@ -197,7 +204,7 @@ function TransactionDialog({
     try {
       setIsSubmitting(true);
 
-      await createTransaction({ ...values });
+      await createTransaction({ ...values, categoryId: values.categoryId as Id<"budgets"> });
 
       setIsDialogOpen(false);
       setDialogState({ mode: "create" });
@@ -226,6 +233,7 @@ function TransactionDialog({
       }
       await updateTransaction({
         ...values,
+        categoryId: values.categoryId as Id<"budgets">,
         transactionId: dialogState.transaction._id,
       });
 
@@ -409,7 +417,7 @@ function TransactionDialog({
             {/* Category */}
             <FormField
               control={form.control}
-              name="category"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -427,7 +435,7 @@ function TransactionDialog({
                       <PopoverTrigger asChild>
                         <Button variant="outline" role="combobox" className="w-[200px] justify-between">
                           {(field.value || categoryValue)
-                            ? getAvailableCategories?.find((cat) => cat.name === (field.value || categoryValue))?.name
+                            ? getAvailableCategories?.find((cat) => String(cat._id) === (field.value || categoryValue))?.name
                             : "Select category..."}
                           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -440,9 +448,9 @@ function TransactionDialog({
                             <CommandGroup>
                               {getAvailableCategories?.map(cat => (
                                 <CommandItem
-                                  key={cat.name}
-                                  value={cat.name}
-                                  onSelect={(currentValue) => {
+                                  key={String(cat._id)}
+                                  value={String(cat._id)}
+                                  onSelect={(currentValue: string) => {
                                     const newValue = currentValue === categoryValue ? "" : currentValue;
                                     setCategoryValue(newValue);
                                     field.onChange(newValue);
@@ -450,7 +458,7 @@ function TransactionDialog({
                                   }}>
                                     <CheckIcon className={cn(
                                       "mr-2 h-4 w-4",
-                                      (field.value || categoryValue) === cat.name ? "opacity-100" : "opacity-50"
+                                      (field.value || categoryValue) === String(cat._id) ? "opacity-100" : "opacity-50"
                                       )} />
                                       {cat.name}
                                 </CommandItem>
@@ -571,7 +579,24 @@ function TransactionDialog({
               <Button
                 variant="outline"
                 type="reset"
-                onClick={() => { form.reset(); setCategoryValue(""); }}
+                onClick={() => {
+                  const now = new Date();
+                  const nowIso = now.toISOString();
+                  const [firstCat] = getAvailableCategories ?? [];
+                  const firstCatId = firstCat ? String(firstCat._id) : "";
+                  form.reset({
+                    merchantName: "",
+                    description: "",
+                    amount: 0,
+                    type: "expense" as const,
+                    categoryId: firstCatId,
+                    date: nowIso,
+                  });
+                  setCategoryValue(firstCatId);
+                  setDatePickerDate(now);
+                  setDatePickerInputValue(formatDate(nowIso));
+                  setDatePickerMonth(now);
+                }}
                 disabled={isSubmitting}
               >
                 Clear
