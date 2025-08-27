@@ -18,9 +18,17 @@ const percentageFormatter = new Intl.NumberFormat("id-ID", {
   signDisplay: "exceptZero",
 });
 
-const dateFormatter = new Intl.DateTimeFormat("id-ID", {
-  dateStyle: "medium",
-});
+const dateFormatterCache = new Map<string, Intl.DateTimeFormat>();
+
+const getDateFormatter = (locale = "id-ID") => {
+  if (!dateFormatterCache.has(locale)) {
+    dateFormatterCache.set(
+      locale,
+      new Intl.DateTimeFormat(locale, { dateStyle: "medium" }),
+    );
+  }
+  return dateFormatterCache.get(locale)!;
+};
 
 export const formatCurrency = (value: number): string => {
   return currencyFormatter.format(value);
@@ -30,12 +38,12 @@ export const formatPercentage = (value: number): string => {
   return percentageFormatter.format(value);
 };
 
-export const formatDate = (date: string | Date): string => {
+export const formatDate = (date: string | Date, locale?: string): string => {
   const dateObj = typeof date === "string" ? new Date(date) : date;
 
   if (isNaN(dateObj.getTime())) return "Invalid date";
 
-  return dateFormatter.format(dateObj);
+  return getDateFormatter(locale).format(dateObj);
 };
 
 export const formatCategoryName = (name: string) => {
