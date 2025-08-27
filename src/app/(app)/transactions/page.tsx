@@ -206,7 +206,7 @@ function TransactionDialog({
       });
       // Set date-related UI to "now"
       setDatePickerDate(now);
-      setDatePickerInputValue(formatDate(nowIso));
+      setDatePickerInputValue("Now");
       setDatePickerMonth(now);
       // Reset category selection; a separate effect will set the first available once categories load
       setCategoryValue(getAvailableCategories?.[0]?._id ?? "");
@@ -523,9 +523,7 @@ function TransactionDialog({
                 // local helper to format date for display without instantly throwing error
                 function formatDateDisplay(date: Date | undefined) {
                   if (!date) return "";
-                  return date.toLocaleDateString("id-ID", {
-                    dateStyle: "medium",
-                  });
+                  return formatDate(date);
                 }
 
                 return (
