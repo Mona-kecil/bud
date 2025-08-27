@@ -4,21 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "~/components/app-sidebar";
 import { cn } from "~/lib/utils";
-import { useState } from "react";
-import QuickAddSheet from "~/components/quick-add-sheet";
-import { useLongPress } from "use-long-press";
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   const items = NAV_ITEMS;
   const centerIndex = 2; // transactions in the middle
-
-  const [quickOpen, setQuickOpen] = useState(false);
-
-  const centerLongPress = useLongPress(() => setQuickOpen(true), {
-    threshold: 300,
-  });
 
   return (
     <nav
@@ -40,7 +31,6 @@ export default function BottomNav() {
               {isCenter ? (
                 <Link
                   href={item.url}
-                  {...centerLongPress()}
                   style={{ WebkitTouchCallout: "none" }}
                   className={cn(
                     "text-muted-foreground hover:text-foreground group relative flex w-full flex-col items-center justify-center gap-1 rounded-md px-3 py-2 text-[11px] font-medium md:text-xs",
@@ -82,7 +72,6 @@ export default function BottomNav() {
           );
         })}
       </ul>
-      <QuickAddSheet open={quickOpen} onOpenChange={setQuickOpen} />
     </nav>
   );
 }
