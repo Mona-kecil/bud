@@ -185,7 +185,7 @@ function TransactionDialog({
         description: dialogState.transaction.description ?? "",
         amount: dialogState.transaction.amount,
         type: dialogState.transaction.type,
-        categoryId: String(dialogState.transaction.categoryId ?? ""),
+        categoryId: dialogState.transaction.categoryId ?? "",
         date: dialogState.transaction.date,
       });
 
@@ -201,7 +201,7 @@ function TransactionDialog({
         description: "",
         amount: 0,
         type: "expense" as const,
-        categoryId: "",
+        categoryId: getAvailableCategories?.[0]?._id ?? "",
         date: nowIso,
       });
       // Set date-related UI to "now"
