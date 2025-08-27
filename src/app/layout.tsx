@@ -26,7 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1 viewport-fit=cover" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1 viewport-fit=cover"
+        />
         <link rel="preconnect" href="https://accounts.bud.kecil.dev" />
         {env.NODE_ENV === "development" && (
           <script

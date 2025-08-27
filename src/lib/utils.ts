@@ -39,5 +39,10 @@ export const formatDate = (date: string | Date): string => {
 };
 
 export const formatCategoryName = (name: string) => {
-  return name.trim().toLowerCase().split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
-}
+  return name
+    .trim()
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
