@@ -16,24 +16,43 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "~/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Ellipsis, PlusCircleIcon } from "lucide-react";
 import { deleteTransaction } from "convex/transactions";
 import { Progress } from "~/components/ui/progress";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 type Budget = Doc<"budgets">;
 
 type DialogState = {
   mode: "create" | "edit";
   budget?: Budget;
-}
+};
 
 export default function BudgetsPage() {
-
   const budgetList = useQuery(api.budgets.getAvailableBudgets, {});
   const spendByBudget = useQuery(api.budgets.getBudgetSpend, {});
 
@@ -46,7 +65,13 @@ export default function BudgetsPage() {
   if (budgetList === undefined) return <LoadingState />;
 
   // Empty state
-  if (budgetList && budgetList.length === 0) return <EmptyState setIsDialogOpen={setIsDialogOpen} setDialogState={setDialogState} />
+  if (budgetList && budgetList.length === 0)
+    return (
+      <EmptyState
+        setIsDialogOpen={setIsDialogOpen}
+        setDialogState={setDialogState}
+      />
+    );
 
   return (
     <>
@@ -68,7 +93,7 @@ export default function BudgetsPage() {
         </BudgetsList>
       )}
     </>
-  )
+  );
 }
 
 function BudgetMetrics() {
@@ -76,13 +101,15 @@ function BudgetMetrics() {
   const totalSpent = useQuery(api.budgets.getTotalSpent, {})!;
   const remaining = totalBudgeted - totalSpent;
   // budgetHealth: percentage of budget used (0% = unused, 100% = fully used, >100% = overspent)
-  const budgetHealth = totalBudgeted > 0 ? (totalSpent / totalBudgeted) * 100 : 0;
+  const budgetHealth =
+    totalBudgeted > 0 ? (totalSpent / totalBudgeted) * 100 : 0;
 
   const data = [
     {
       title: "Total Budgeted",
       value: totalBudgeted,
-      description: "The total amount you have allocated across all your budgets.",
+      description:
+        "The total amount you have allocated across all your budgets.",
     },
     {
       title: "Total Spent",
@@ -92,20 +119,30 @@ function BudgetMetrics() {
     {
       title: "Remaining",
       value: remaining,
-      description: "The amount left to spend before reaching your total budget.",
+      description:
+        "The amount left to spend before reaching your total budget.",
     },
-  ]
+  ];
 
   return (
-    <div className="grid gap-4 grid-cols-1 mb-4">
+    <div className="mb-4 grid grid-cols-1 gap-4">
       {data.map((item) => (
-        <Card key={item.title} className="col-span-1 flex flex-col justify-between">
+        <Card
+          key={item.title}
+          className="col-span-1 flex flex-col justify-between"
+        >
           <CardHeader>
             <CardTitle className="text-base">{item.title}</CardTitle>
-            <CardDescription className="text-xs">{item.description}</CardDescription>
+            <CardDescription className="text-xs">
+              {item.description}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <span className={`text-lg font-bold ${item.value > 0 ? "text-primary" : "text-destructive"}`}>{formatCurrency(item.value ?? 0)}</span>
+            <span
+              className={`text-lg font-bold ${item.value > 0 ? "text-primary" : "text-destructive"}`}
+            >
+              {formatCurrency(item.value ?? 0)}
+            </span>
           </CardContent>
         </Card>
       ))}
@@ -120,10 +157,12 @@ function BudgetMetrics() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center gap-4">
-            <div className={`font-bold self-start text-lg ${budgetHealth > 100 ? "text-destructive" : "text-primary"}`}>
+            <div
+              className={`self-start text-lg font-bold ${budgetHealth > 100 ? "text-destructive" : "text-primary"}`}
+            >
               {budgetHealth.toFixed(1)}%
             </div>
-            <div className="w-full h-3 bg-muted rounded">
+            <div className="bg-muted h-3 w-full rounded">
               <div
                 className={`h-3 rounded ${budgetHealth < 100 ? "bg-primary" : "bg-destructive"}`}
                 style={{
@@ -139,10 +178,8 @@ function BudgetMetrics() {
           )}
         </CardContent>
       </Card>
-
     </div>
-  )
-
+  );
 }
 
 function BudgetDialog({
@@ -156,15 +193,14 @@ function BudgetDialog({
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
 }) {
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createBudget = useMutation(api.budgets.createBudget);
   const updateBudget = useMutation(api.budgets.updateBudget);
 
   const formSchema = z.object({
-    name: z.string().min(1, {message: "Budget name is required"}),
-    amount: z.number().min(1, {message: "Amount must be greater than 0"}),
+    name: z.string().min(1, { message: "Budget name is required" }),
+    amount: z.number().min(1, { message: "Amount must be greater than 0" }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -185,20 +221,18 @@ function BudgetDialog({
       form.reset({
         name: "",
         amount: 0,
-      })
+      });
     }
   }, [dialogState, form]);
 
-  const handleCreateBudget = async (
-    values: z.infer<typeof formSchema>,
-  ) => {
+  const handleCreateBudget = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitting(true);
 
-      await createBudget({...values});
+      await createBudget({ ...values });
 
       setIsDialogOpen(false);
-      setDialogState({mode: "create"});
+      setDialogState({ mode: "create" });
 
       toast.success("Budget created successfully", {
         position: "top-center",
@@ -211,7 +245,7 @@ function BudgetDialog({
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   const handleUpdateTransaction = async (
     values: z.infer<typeof formSchema>,
@@ -229,7 +263,7 @@ function BudgetDialog({
       });
 
       setIsDialogOpen(false);
-      setDialogState({mode: "create"});
+      setDialogState({ mode: "create" });
 
       toast.success("Budget updated successfully", {
         position: "top-center",
@@ -242,12 +276,12 @@ function BudgetDialog({
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     if (dialogState.mode === "create") await handleCreateBudget(values);
     else if (dialogState.mode === "edit") await handleUpdateTransaction(values);
-  }
+  };
 
   return (
     <Drawer open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -255,7 +289,7 @@ function BudgetDialog({
         <div className="flex items-center justify-center pt-2">
           <Button
             onClick={() => {
-              setDialogState({mode: "create"});
+              setDialogState({ mode: "create" });
               setIsDialogOpen(true);
             }}
             className="w-full"
@@ -268,9 +302,7 @@ function BudgetDialog({
       <DrawerContent aria-describedby={undefined} className="w-full">
         <DrawerHeader className="text-left">
           <DrawerTitle>
-            {dialogState.mode === "create"
-              ? "Add Budget"
-              : "Edit Budget"}
+            {dialogState.mode === "create" ? "Add Budget" : "Edit Budget"}
           </DrawerTitle>
           <DrawerDescription>
             {dialogState.mode === "create"
@@ -281,17 +313,23 @@ function BudgetDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 px-4 overflow-y-scroll"
+            className="space-y-4 overflow-y-scroll px-4"
           >
             {/* Budget Name */}
             <FormField
               control={form.control}
               name="name"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm">
                     Budget Name
-                    <span className="text-destructive" aria-hidden="true" aria-label="required">*</span>
+                    <span
+                      className="text-destructive"
+                      aria-hidden="true"
+                      aria-label="required"
+                    >
+                      *
+                    </span>
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -309,11 +347,11 @@ function BudgetDialog({
             <FormField
               control={form.control}
               name="amount"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm">Amount</FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       {...field}
                       type="text"
                       inputMode="numeric"
@@ -326,7 +364,7 @@ function BudgetDialog({
                         field.onChange(num);
                       }}
                       min="0"
-                    /> 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -346,13 +384,11 @@ function BudgetDialog({
         </Form>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }
 
 function LoadingState() {
-  return (
-    <div>Loading...</div>
-  )
+  return <div>Loading...</div>;
 }
 
 function EmptyState({
@@ -386,101 +422,119 @@ function EmptyState({
         </div>
       </div>
     </>
-  )
+  );
 }
 
-const BudgetsList = memo(({
-  budgetList,
-  setDialogState,
-  setIsDialogOpen,
-  spendByBudget,
-  children,
-}: {
-  budgetList: Budget[];
-  setDialogState: (state: DialogState) => void;
-  setIsDialogOpen: (open: boolean) => void;
-  spendByBudget?: Record<string, number>;
-  children: ReactNode;
-}) => {
-  const deleteBudget = useMutation(api.budgets.deleteBudget);
+const BudgetsList = memo(
+  ({
+    budgetList,
+    setDialogState,
+    setIsDialogOpen,
+    spendByBudget,
+    children,
+  }: {
+    budgetList: Budget[];
+    setDialogState: (state: DialogState) => void;
+    setIsDialogOpen: (open: boolean) => void;
+    spendByBudget?: Record<string, number>;
+    children: ReactNode;
+  }) => {
+    const deleteBudget = useMutation(api.budgets.deleteBudget);
 
-  const handleDeleteBudget = useCallback(async (budget: Budget) => {
-    try {
-      await deleteBudget({budgetId: budget._id});
-      toast.success("Budget deleted successfully", {
-        position: "top-center",
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to delete budget", {
-        position: "top-center",
-      });
-    }
-  }, [deleteBudget]);
+    const handleDeleteBudget = useCallback(
+      async (budget: Budget) => {
+        try {
+          await deleteBudget({ budgetId: budget._id });
+          toast.success("Budget deleted successfully", {
+            position: "top-center",
+          });
+        } catch (error) {
+          console.error(error);
+          toast.error("Failed to delete budget", {
+            position: "top-center",
+          });
+        }
+      },
+      [deleteBudget],
+    );
 
-  const handleEditBudget = useCallback(async (budget: Budget) => {
-    setDialogState({mode: "edit", budget});
-    setIsDialogOpen(true);
-  }, [setDialogState, setIsDialogOpen]);
+    const handleEditBudget = useCallback(
+      async (budget: Budget) => {
+        setDialogState({ mode: "edit", budget });
+        setIsDialogOpen(true);
+      },
+      [setDialogState, setIsDialogOpen],
+    );
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">All Budgets</CardTitle>
-        <CardDescription className="text-xs">Track your spending against budget categories</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {budgetList.map((budget) => {
-          const spent = spendByBudget?.[budget._id] ?? 0;
-          const amount = budget.amount ?? 0;
-          const pct = amount > 0 ? (spent / amount) * 100 : 0;
-          const pctClamped = Math.min(Math.max(pct, 0), 100);
-          return (
-            <div key={budget._id} className="flex flex-col gap-2 border-b last:border-b-0 pb-3">
-              <div className="flex items-center justify-between gap-4">
-                {/* name, amount, spent */}
-                <div className="flex min-w-0 flex-col">
-                  <div className="truncate font-medium text-sm">{budget.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatCurrency(spent)} / {formatCurrency(amount)}
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">All Budgets</CardTitle>
+          <CardDescription className="text-xs">
+            Track your spending against budget categories
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {budgetList.map((budget) => {
+            const spent = spendByBudget?.[budget._id] ?? 0;
+            const amount = budget.amount ?? 0;
+            const pct = amount > 0 ? (spent / amount) * 100 : 0;
+            const pctClamped = Math.min(Math.max(pct, 0), 100);
+            return (
+              <div
+                key={budget._id}
+                className="flex flex-col gap-2 border-b pb-3 last:border-b-0"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  {/* name, amount, spent */}
+                  <div className="flex min-w-0 flex-col">
+                    <div className="truncate text-sm font-medium">
+                      {budget.name}
+                    </div>
+                    <div className="text-muted-foreground text-xs">
+                      {formatCurrency(spent)} / {formatCurrency(amount)}
+                    </div>
+                  </div>
+
+                  {/* the used percentage (right-aligned, fixed width) */}
+                  <div className="text-muted-foreground flex w-16 shrink-0 items-center justify-center text-right text-xs tabular-nums">
+                    {pct.toFixed(1)}%
+                    {/* Dropdowns to add edit and delete functionality */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Ellipsis className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="absolute right-0"
+                      >
+                        <DropdownMenuItem
+                          onClick={() => handleEditBudget(budget)}
+                          className="cursor-pointer"
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteBudget(budget)}
+                          className="cursor-pointer"
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
-
-                {/* the used percentage (right-aligned, fixed width) */}
-                <div className="shrink-0 flex items-center justify-center w-16 text-right tabular-nums text-xs text-muted-foreground">
-                  {pct.toFixed(1)}%
-                  {/* Dropdowns to add edit and delete functionality */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Ellipsis className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="absolute right-0">
-                    <DropdownMenuItem
-                      onClick={() => handleEditBudget(budget)}
-                      className="cursor-pointer"
-                    >
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDeleteBudget(budget)}
-                      className="cursor-pointer"
-                    >
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                </div>
+                <Progress value={pctClamped} />
               </div>
-              <Progress value={pctClamped} />
-            </div>
-          );
-        })}
-        {children}
-      </CardContent>
-    </Card>
-  )
-});
+            );
+          })}
+          {children}
+        </CardContent>
+      </Card>
+    );
+  },
+);
 
-BudgetsList.displayName ="BudgetsList";
+BudgetsList.displayName = "BudgetsList";

@@ -58,8 +58,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "~/components/ui/drawer";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "~/components/ui/command";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "~/components/ui/drawer";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 
 type Transaction = Doc<"transactions">;
 
@@ -204,7 +219,10 @@ function TransactionDialog({
     try {
       setIsSubmitting(true);
 
-      await createTransaction({ ...values, categoryId: values.categoryId as Id<"budgets"> });
+      await createTransaction({
+        ...values,
+        categoryId: values.categoryId as Id<"budgets">,
+      });
 
       setIsDialogOpen(false);
       setDialogState({ mode: "create" });
@@ -288,22 +306,22 @@ function TransactionDialog({
         </Button>
       </DrawerTrigger>
       <DrawerContent aria-describedby={undefined} className="w-full">
-          <DrawerHeader className="text-left">
-            <DrawerTitle>
-              {dialogState.mode === "create"
-                ? "Add Transaction"
-                : "Edit Transaction"}
-            </DrawerTitle>
-            <DrawerDescription>
-              {dialogState.mode === "create"
-                ? "Add new transaction here. Click submit when you're done."
-                : "Modify existing transaction. Click submit when you're done."}
-            </DrawerDescription>
-          </DrawerHeader>
+        <DrawerHeader className="text-left">
+          <DrawerTitle>
+            {dialogState.mode === "create"
+              ? "Add Transaction"
+              : "Edit Transaction"}
+          </DrawerTitle>
+          <DrawerDescription>
+            {dialogState.mode === "create"
+              ? "Add new transaction here. Click submit when you're done."
+              : "Modify existing transaction. Click submit when you're done."}
+          </DrawerDescription>
+        </DrawerHeader>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 px-4 overflow-y-scroll"
+            className="space-y-4 overflow-y-scroll px-4"
           >
             {/* Merchant Name */}
             <FormField
@@ -433,9 +451,17 @@ function TransactionDialog({
                   <FormControl>
                     <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" role="combobox" className="w-[200px] justify-between">
-                          {(field.value || categoryValue)
-                            ? getAvailableCategories?.find((cat) => String(cat._id) === (field.value || categoryValue))?.name
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className="w-[200px] justify-between"
+                        >
+                          {field.value || categoryValue
+                            ? getAvailableCategories?.find(
+                                (cat) =>
+                                  String(cat._id) ===
+                                  (field.value || categoryValue),
+                              )?.name
                             : "Select category..."}
                           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -444,23 +470,35 @@ function TransactionDialog({
                         <Command>
                           <CommandInput placeholder="search category..." />
                           <CommandList>
-                            <CommandEmpty>No Category found. Please create it first at `/budgets` page</CommandEmpty>
+                            <CommandEmpty>
+                              No Category found. Please create it first at
+                              `/budgets` page
+                            </CommandEmpty>
                             <CommandGroup>
-                              {getAvailableCategories?.map(cat => (
+                              {getAvailableCategories?.map((cat) => (
                                 <CommandItem
                                   key={cat._id}
                                   value={cat.name}
                                   onSelect={(currentValue: string) => {
-                                    const newValue = currentValue === categoryValue ? "" : currentValue;
+                                    const newValue =
+                                      currentValue === categoryValue
+                                        ? ""
+                                        : currentValue;
                                     setCategoryValue(newValue);
                                     field.onChange(cat._id);
                                     setCategoryOpen(false);
-                                  }}>
-                                    <CheckIcon className={cn(
+                                  }}
+                                >
+                                  <CheckIcon
+                                    className={cn(
                                       "mr-2 h-4 w-4",
-                                      (field.value || categoryValue) === String(cat._id) ? "opacity-100" : "opacity-50"
-                                      )} />
-                                      {cat.name}
+                                      (field.value || categoryValue) ===
+                                        String(cat._id)
+                                        ? "opacity-100"
+                                        : "opacity-50",
+                                    )}
+                                  />
+                                  {cat.name}
                                 </CommandItem>
                               ))}
                             </CommandGroup>
@@ -653,7 +691,8 @@ function EmptyState({
           >
             <PlusCircle className="h-4 w-4" />
             Add Your First Transaction
-          </Button>`
+          </Button>
+          `
         </div>
       </div>
     </>

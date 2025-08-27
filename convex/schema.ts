@@ -28,6 +28,5 @@ export default defineSchema({
     userId: v.id("users"),
     name: v.string(),
     amount: v.optional(v.number()),
-  })
-    .index("by_user_name", ["userId", "name"]),
+  }).index("by_user_name", ["userId", "name"]),
 });
