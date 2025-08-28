@@ -748,69 +748,87 @@ const TransactionsList = memo(
         <CardContent className="space-y-2">
           {useMemo(() => {
             const sections = groupTransactionsByDate(transactionList);
-            return sections.map((section) => (
-              <Fragment key={section.key}>
-                <DateHeader label={section.label} />
-                {section.items.map((transaction) => (
-                  <motion.div
-                    key={transaction._id}
-                    className="border-border/25 hover:bg-muted flex cursor-pointer items-center gap-4 rounded-md border-r border-b p-2 shadow-xs"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                  >
-                    {/* Icon */}
-                    <div className="h-fit w-fit rounded-full border p-2">
-                      {transaction.type === "income" ? (
-                        <ArrowDownLeft className="h-4 w-4 stroke-3 text-green-400" />
-                      ) : transaction.type === "expense" ? (
-                        <ArrowUpRight className="h-4 w-4 stroke-3 text-red-400" />
-                      ) : (
-                        <ArrowUpRight className="h-4 w-4 stroke-3 text-blue-400" />
-                      )}
-                    </div>
+            const container = {
+              hidden: { opacity: 1 },
+              show: { opacity: 1, transition: { staggerChildren: 0.05 } },
+            } as const;
+            const headerVariant = {
+              hidden: { opacity: 0, y: -4 },
+              show: { opacity: 0.5, y: 0 },
+            } as const;
+            const rowVariant = {
+              hidden: { opacity: 0, y: 10 },
+              show: { opacity: 1, y: 0 },
+            } as const;
 
-                    {/* Merchant Name and Description */}
-                    <div className="flex flex-3/5 flex-col">
-                      <p className="font-bold">{transaction.merchantName}</p>
-                      <p className="text-muted-foreground text-sm">
-                        {transaction.description}
-                      </p>
-                    </div>
+            return (
+              <motion.div variants={container} initial="hidden" animate="show" className="space-y-2">
+                {sections.map((section) => (
+                  <Fragment key={section.key}>
+                    <motion.div variants={headerVariant}>
+                      <DateHeader label={section.label} />
+                    </motion.div>
+                    {section.items.map((transaction) => (
+                      <motion.div
+                        key={transaction._id}
+                        variants={rowVariant}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                        className="border-border/25 hover:bg-muted flex cursor-pointer items-center gap-4 rounded-md border p-2 shadow-xs"
+                      >
+                        {/* Icon */}
+                        <div className="h-fit w-fit rounded-full border p-2">
+                          {transaction.type === "income" ? (
+                            <ArrowDownLeft className="h-4 w-4 stroke-3 text-green-400" />
+                          ) : transaction.type === "expense" ? (
+                            <ArrowUpRight className="h-4 w-4 stroke-3 text-red-400" />
+                          ) : (
+                            <ArrowUpRight className="h-4 w-4 stroke-3 text-blue-400" />
+                          )}
+                        </div>
 
-                    {/* Amount and Date */}
-                    <div>
-                      <p className="font-bold">
-                        {formatCurrency(transaction.amount)}
-                      </p>
-                    </div>
+                        {/* Merchant Name and Description */}
+                        <div className="flex flex-3/5 flex-col">
+                          <p className="font-bold">{transaction.merchantName}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {transaction.description}
+                          </p>
+                        </div>
 
-                    {/* Menu button to edit and delete functionality */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Ellipsis className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleEditTransaction(transaction)}
-                          className="cursor-pointer"
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteTransaction(transaction)}
-                          className="cursor-pointer"
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </motion.div>
+                        {/* Amount and Date */}
+                        <div>
+                          <p className="font-bold">
+                            {formatCurrency(transaction.amount)}
+                          </p>
+                        </div>
+
+                        {/* Menu button to edit and delete functionality */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Ellipsis className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleEditTransaction(transaction)}
+                              className="cursor-pointer"
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteTransaction(transaction)}
+                              className="cursor-pointer"
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </motion.div>
+                    ))}
+                  </Fragment>
                 ))}
-              </Fragment>
-            ));
+              </motion.div>
+            );
           }, [transactionList])}
         </CardContent>
       </Card>
@@ -842,9 +860,9 @@ function dateKey(iso: string): string {
   return new Date(iso).toDateString();
 }
 
-function DateHeader({ label }: { label: string }) {
+function DateHeader({ label, className }: { label: string, className?: string }) {
   return (
-    <div className="flex items-center gap-4 py-3 opacity-50">
+    <div className={cn("flex items-center gap-4 py-3 opacity-50", className)}>
       <Separator className="flex-1" />
       <span className="text-muted-foreground text-sm font-medium">{label}</span>
       <Separator className="flex-1" />
