@@ -205,7 +205,8 @@ export const getBudgetSpend = query({
       .order("asc");
 
     for await (const tx of txQuery) {
-      if (tx.type !== "expense") continue;
+      if (tx.type === "income") continue;
+
       if (!tx.categoryId) continue;
       const key = tx.categoryId;
       spendByBudget[key] = (spendByBudget[key] ?? 0) + tx.amount;
@@ -290,7 +291,7 @@ export const getTotalSpent = query({
       .order("asc");
 
     for await (const tx of txQuery) {
-      if (tx.type !== "expense") continue;
+      if (tx.type === "income") continue;
       total += tx.amount;
     }
 
