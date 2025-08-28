@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { formatCurrency } from "~/lib/utils";
-import type { Doc } from "convex/_generated/dataModel";
+import type { Id } from "convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { memo, useCallback, useEffect, useState, type ReactNode } from "react";
@@ -45,7 +45,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 
-type Budget = Doc<"budgets">;
+type Budget = { _id: Id<"budgets">; name: string; amount?: number };
 
 type DialogState = {
   mode: "create" | "edit";
