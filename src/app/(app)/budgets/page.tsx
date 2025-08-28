@@ -137,7 +137,7 @@ function BudgetMetrics() {
           className="col-span-1 flex flex-col justify-between"
         >
           <CardHeader>
-            <CardTitle className="text-base">{item.title}</CardTitle>
+            <CardTitle className="font-hand text-base">{item.title}</CardTitle>
             <CardDescription className="text-xs">
               {item.description}
             </CardDescription>
@@ -155,7 +155,7 @@ function BudgetMetrics() {
       {/* Budget Health Card */}
       <Card className="col-span-1 flex flex-col justify-between">
         <CardHeader>
-          <CardTitle className="text-base">Budget Health</CardTitle>
+          <CardTitle className="font-hand text-base">Budget Health</CardTitle>
           <CardDescription className="text-xs">
             Amount of your total budget still available.
           </CardDescription>
@@ -481,7 +481,7 @@ const BudgetsList = memo(
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">All Budgets</CardTitle>
+          <CardTitle className="font-hand text-base">All Budgets</CardTitle>
           <CardDescription className="text-xs">
             Track your spending against budget categories
           </CardDescription>
