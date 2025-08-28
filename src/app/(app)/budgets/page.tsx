@@ -37,7 +37,12 @@ import {
 import { Input } from "~/components/ui/input";
 import { Ellipsis, PlusCircleIcon } from "lucide-react";
 import { Progress } from "~/components/ui/progress";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 
 type Budget = Doc<"budgets">;
@@ -95,9 +100,14 @@ function BudgetMetrics() {
   const totalBudgeted = useQuery(api.budgets.getTotalBudgets, {})!;
   const totalSpent = useQuery(api.budgets.getTotalSpent, {})!;
   const remaining = totalBudgeted - totalSpent;
-  // budgetHealth: percentage of budget used (0% = unused, 100% = fully used, >100% = overspent)
-  const budgetHealth =
-    totalBudgeted > 0 ? (totalSpent / totalBudgeted) * 100 : 0;
+  // budgetHealth: percentage of budget remaining (100 = all budget left, 0 = fully spent, <0 = overspent)
+  // rawBudgetHealth may be negative when overspent; clamp displayed value to max 100
+  const rawBudgetHealth =
+    totalBudgeted > 0
+      ? ((totalBudgeted - totalSpent) / totalBudgeted) * 100
+      : 0;
+  // Numeric display should not exceed 100
+  const budgetHealth = Math.min(rawBudgetHealth, 100);
 
   const data = [
     {
@@ -147,30 +157,34 @@ function BudgetMetrics() {
         <CardHeader>
           <CardTitle className="text-base">Budget Health</CardTitle>
           <CardDescription className="text-xs">
-            Percentage of your total budget that has been spent.
+            Amount of your total budget still available.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center gap-4">
-            <div
-              className={`self-start text-lg font-bold ${budgetHealth > 100 ? "text-destructive" : "text-primary"}`}
-            >
-              {budgetHealth.toFixed(1)}%
+          <div className="flex flex-col gap-2">
+            <div className="text-lg font-bold">
+              <span
+                className={`${rawBudgetHealth <= 0 ? "text-destructive" : "text-primary"}`}
+              >
+                {budgetHealth.toFixed(1)}% remaining
+              </span>
             </div>
             <div className="bg-muted h-3 w-full rounded">
               <div
-                className={`h-3 rounded ${budgetHealth < 100 ? "bg-primary" : "bg-destructive"}`}
+                className={`h-3 rounded ${rawBudgetHealth <= 0 ? "bg-destructive" : rawBudgetHealth < 25 ? "bg-amber-500" : "bg-primary"}`}
                 style={{
-                  width: `${Math.min(budgetHealth, 100)}%`,
+                  width: `${Math.max(Math.min(rawBudgetHealth, 100), 0)}%`,
                 }}
               />
             </div>
+            {rawBudgetHealth <= 0 && (
+              <div className="text-destructive mt-2 text-sm">
+                You have overspent your budget by{" "}
+                {Math.abs(rawBudgetHealth).toFixed(1)}% (
+                {formatCurrency(Math.abs(remaining))})
+              </div>
+            )}
           </div>
-          {budgetHealth > 100 && (
-            <div className="text-destructive mt-2 text-sm">
-              You have overspent your budget!
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
@@ -461,71 +475,97 @@ const BudgetsList = memo(
       [setDialogState, setIsDialogOpen],
     );
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">All Budgets</CardTitle>
-        <CardDescription className="text-xs">Track your spending against budget categories</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {budgetList.map((budget) => {
-          const spent = spendByBudget?.[budget._id] ?? 0;
-          const amount = budget.amount ?? 0;
-          const pct = amount > 0 ? (spent / amount) * 100 : 0;
-          const pctClamped = Math.min(Math.max(pct, 0), 100);
-          const isOverspent = pct >= 100;
-          return (
-            <div key={budget._id} className="flex flex-col gap-2 border-b last:border-b-0 pb-3">
-              <div className="flex items-center justify-between gap-4">
-                {/* name, amount, spent */}
-                <div className="flex min-w-0 flex-col">
-                  <div className={cn("truncate font-medium text-sm", isOverspent && "text-destructive")}>{budget.name}</div>
-                  <div className={cn("text-xs text-muted-foreground", isOverspent && "text-destructive")}>
-                    {formatCurrency(spent)} / {formatCurrency(amount)}
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">All Budgets</CardTitle>
+          <CardDescription className="text-xs">
+            Track your spending against budget categories
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {budgetList.map((budget) => {
+            const spent = spendByBudget?.[budget._id] ?? 0;
+            const amount = budget.amount ?? 0;
+            const pct = amount > 0 ? (spent / amount) * 100 : 0;
+            const pctClamped = Math.min(Math.max(pct, 0), 100);
+            const isOverspent = pct >= 100;
+            return (
+              <div
+                key={budget._id}
+                className="flex flex-col gap-2 border-b pb-3 last:border-b-0"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  {/* name, amount, spent */}
+                  <div className="flex min-w-0 flex-col">
+                    <div
+                      className={cn(
+                        "truncate text-sm font-medium",
+                        isOverspent && "text-destructive",
+                      )}
+                    >
+                      {budget.name}
+                    </div>
+                    <div
+                      className={cn(
+                        "text-muted-foreground text-xs",
+                        isOverspent && "text-destructive",
+                      )}
+                    >
+                      {formatCurrency(spent)} / {formatCurrency(amount)}
+                    </div>
+                  </div>
+
+                  {/* the used percentage (right-aligned, fixed width) */}
+                  <div
+                    className={cn(
+                      "text-muted-foreground flex w-16 shrink-0 items-center justify-center text-right text-xs tabular-nums",
+                      isOverspent && "text-destructive",
+                    )}
+                  >
+                    {pct.toFixed(1)}%
+                    {/* Dropdowns to add edit and delete functionality */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Ellipsis className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="absolute right-0"
+                      >
+                        <DropdownMenuItem
+                          onClick={() => handleEditBudget(budget)}
+                          className="cursor-pointer"
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteBudget(budget)}
+                          className="cursor-pointer"
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
-
-                {/* the used percentage (right-aligned, fixed width) */}
-                <div className={cn("shrink-0 flex items-center justify-center w-16 text-right tabular-nums text-xs text-muted-foreground", isOverspent && "text-destructive")}> 
-                  {pct.toFixed(1)}%
-                  {/* Dropdowns to add edit and delete functionality */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Ellipsis className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="absolute right-0">
-                    <DropdownMenuItem
-                      onClick={() => handleEditBudget(budget)}
-                      className="cursor-pointer"
-                    >
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDeleteBudget(budget)}
-                      className="cursor-pointer"
-                    >
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                </div>
+                <Progress
+                  value={pctClamped}
+                  indicatorClassName={cn(isOverspent && "bg-destructive")}
+                />
+                {isOverspent && (
+                  <div className="text-destructive text-xs">Overspent</div>
+                )}
               </div>
-              <Progress
-                value={pctClamped}
-                indicatorClassName={cn(isOverspent && "bg-destructive")}
-              />
-              {isOverspent && (
-                <div className="text-destructive text-xs">Overspent</div>
-              )}
-            </div>
-          );
-        })}
-        {children}
-      </CardContent>
-    </Card>
-  )
-});
+            );
+          })}
+          {children}
+        </CardContent>
+      </Card>
+    );
+  },
+);
 
 BudgetsList.displayName = "BudgetsList";
