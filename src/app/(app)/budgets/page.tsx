@@ -171,7 +171,10 @@ function BudgetMetrics() {
             </div>
             <div className="bg-muted h-3 w-full rounded">
               <div
-                className={`h-3 rounded ${rawBudgetHealth <= 0 ? "bg-destructive" : rawBudgetHealth < 25 ? "bg-amber-500" : "bg-primary"}`}
+                className={cn(
+                  "h-3 rounded",
+                  rawBudgetHealth <= 0 ? "bg-destructive" : "bg-primary",
+                )}
                 style={{
                   width: `${Math.max(Math.min(rawBudgetHealth, 100), 0)}%`,
                 }}
