@@ -165,11 +165,13 @@
 html {
   font-family: var(--font-sans);
   font-size: 14px;
+  overscroll-behavior-y: none;
 }
 
 body {
   letter-spacing: var(--tracking-normal);
   padding-top: env(safe-area-inset-top);
+  overscroll-behavior-y: none;
 }
 
 .hf-hand {
