@@ -29,7 +29,7 @@ export default function GoalsPage() {
           return (
             <Card key={goal.id}>
               <CardHeader>
-                <CardTitle>{goal.name}</CardTitle>
+                <CardTitle className="font-hand">{goal.name}</CardTitle>
                 <CardDescription>Target date: {goal.deadline}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -62,7 +62,9 @@ export default function GoalsPage() {
           <div className="bg-muted mb-4 rounded-full p-3">
             <PlusCircle className="text-muted-foreground h-6 w-6" />
           </div>
-          <h3 className="mb-2 text-lg font-medium">Create New Goal</h3>
+          <h3 className="font-hand mb-2 text-lg font-medium">
+            Create New Goal
+          </h3>
           <p className="text-muted-foreground mb-4 text-center text-sm">
             Set up a new financial goal to track your progress
           </p>

@@ -8,13 +8,13 @@ export default function LandingPage() {
     <div className="mx-auto max-w-screen-sm space-y-10 p-6">
       {/* Hero */}
       <section className="text-center">
-        <h1 className="font-sans text-4xl leading-tight font-bold text-balance sm:text-5xl">
+        <h1 className="font-hand text-4xl leading-tight font-bold text-balance">
           Tap. Type.{" "}
           <span className="decoration-primary underline underline-offset-4">
             Done.
           </span>
         </h1>
-        <p className="text-muted-foreground mt-3 text-base sm:text-lg">
+        <p className="text-muted-foreground text-body mt-3">
           Built for thumbs, not spreadsheets.
         </p>
 
@@ -38,9 +38,15 @@ export default function LandingPage() {
 
       {/* Proof points */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <BadgeCard>Fast entry</BadgeCard>
-        <BadgeCard>Mobile-first</BadgeCard>
-        <BadgeCard>PWA-ready</BadgeCard>
+        <BadgeCard>
+          <span className="font-hand text-sm">Fast entry</span>
+        </BadgeCard>
+        <BadgeCard>
+          <span className="font-hand text-sm">Mobile-first</span>
+        </BadgeCard>
+        <BadgeCard>
+          <span className="font-hand text-sm">PWA-ready</span>
+        </BadgeCard>
       </section>
 
       {/* How it works */}
@@ -77,7 +83,7 @@ function Step({ label }: { label: string }) {
   return (
     <div className="bg-card rounded-lg border p-4 shadow-sm">
       <div className="mx-auto mb-2 h-8 w-8 rounded-full border" />
-      <div className="font-sans text-base font-semibold">{label}</div>
+      <div className="font-hand text-base font-semibold">{label}</div>
     </div>
   );
 }

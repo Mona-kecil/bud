@@ -211,7 +211,7 @@ function TransactionDialog({
       // Reset category selection; a separate effect will set the first available once categories load
       setCategoryValue(getAvailableCategories?.[0]?._id ?? "");
     }
-  }, [dialogState, form]);
+  }, [dialogState, form, getAvailableCategories]);
 
   const handleCreateTransaction = async (
     values: z.infer<typeof formSchema>,
@@ -307,7 +307,7 @@ function TransactionDialog({
       </DrawerTrigger>
       <DrawerContent aria-describedby={undefined} className="w-full">
         <DrawerHeader className="text-left">
-          <DrawerTitle>
+          <DrawerTitle className="font-hand">
             {dialogState.mode === "create"
               ? "Add Transaction"
               : "Edit Transaction"}
@@ -737,7 +737,7 @@ const TransactionsList = memo(
     return (
       <Card>
         <CardHeader>
-          <CardTitle>All Transactions</CardTitle>
+          <CardTitle className="font-hand">All Transactions</CardTitle>
 
           <CardDescription>
             View and manage all your financial transactions

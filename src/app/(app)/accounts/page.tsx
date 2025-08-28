@@ -25,7 +25,9 @@ export default function AccountsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
+            <CardTitle className="font-hand text-sm font-medium">
+              Total Assets
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -39,7 +41,9 @@ export default function AccountsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Debt</CardTitle>
+            <CardTitle className="font-hand text-sm font-medium">
+              Total Debt
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -53,7 +57,9 @@ export default function AccountsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
+            <CardTitle className="font-hand text-sm font-medium">
+              Net Worth
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -70,7 +76,9 @@ export default function AccountsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Accounts</CardTitle>
+            <CardTitle className="font-hand text-sm font-medium">
+              Accounts
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockAccounts.length}</div>
@@ -79,7 +87,7 @@ export default function AccountsPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>All Accounts</CardTitle>
+          <CardTitle className="font-hand">All Accounts</CardTitle>
           <CardDescription>
             Manage your connected financial accounts
           </CardDescription>
