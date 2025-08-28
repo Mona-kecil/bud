@@ -42,7 +42,7 @@ import {
 } from "~/components/ui/select";
 import { Calendar } from "~/components/ui/calendar";
 import { parseDate } from "chrono-node";
-import { memo, useCallback, useEffect, useState } from "react";
+import { Fragment, memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -52,6 +52,7 @@ import { toast } from "sonner";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { Doc, Id } from "convex/_generated/dataModel";
 import { motion } from "motion/react";
+import { Separator } from "~/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -745,67 +746,72 @@ const TransactionsList = memo(
         </CardHeader>
 
         <CardContent className="space-y-2">
-          {transactionList.map((transaction) => (
-            <motion.div
-              className="border-border/50 hover:bg-muted flex cursor-pointer items-center gap-4 rounded-md border-b px-4 py-2"
-              key={transaction._id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            >
-              {/* Icon */}
-              <div className="h-fit w-fit rounded-full border p-2">
-                {transaction.type === "income" ? (
-                  <ArrowDownLeft className="h-4 w-4 stroke-3 text-green-400" />
-                ) : transaction.type === "expense" ? (
-                  <ArrowUpRight className="h-4 w-4 stroke-3 text-red-400" />
-                ) : (
-                  <ArrowUpRight className="h-4 w-4 stroke-3 text-blue-400" />
-                )}
-              </div>
-
-              {/* Merchant Name and Description */}
-              <div className="flex flex-3/5 flex-col">
-                <p className="font-bold">{transaction.merchantName}</p>
-                <p className="text-muted-foreground text-sm">
-                  {transaction.description}
-                </p>
-              </div>
-
-              {/* Amount and Date */}
-              <div className="flex flex-col text-right">
-                <p className="font-bold">
-                  {formatCurrency(transaction.amount)}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  {formatDate(transaction.date)}
-                </p>
-              </div>
-
-              {/* Menu button to edit and delete functionality */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Ellipsis className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => handleEditTransaction(transaction)}
-                    className="cursor-pointer"
+          {useMemo(() => {
+            const sections = groupTransactionsByDate(transactionList);
+            return sections.map((section) => (
+              <Fragment key={section.key}>
+                <DateHeader label={section.label} />
+                {section.items.map((transaction) => (
+                  <motion.div
+                    key={transaction._id}
+                    className="border-border/25 hover:bg-muted flex cursor-pointer items-center gap-4 rounded-md border-r border-b p-2 shadow-xs"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
                   >
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleDeleteTransaction(transaction)}
-                    className="cursor-pointer"
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </motion.div>
-          ))}
+                    {/* Icon */}
+                    <div className="h-fit w-fit rounded-full border p-2">
+                      {transaction.type === "income" ? (
+                        <ArrowDownLeft className="h-4 w-4 stroke-3 text-green-400" />
+                      ) : transaction.type === "expense" ? (
+                        <ArrowUpRight className="h-4 w-4 stroke-3 text-red-400" />
+                      ) : (
+                        <ArrowUpRight className="h-4 w-4 stroke-3 text-blue-400" />
+                      )}
+                    </div>
+
+                    {/* Merchant Name and Description */}
+                    <div className="flex flex-3/5 flex-col">
+                      <p className="font-bold">{transaction.merchantName}</p>
+                      <p className="text-muted-foreground text-sm">
+                        {transaction.description}
+                      </p>
+                    </div>
+
+                    {/* Amount and Date */}
+                    <div>
+                      <p className="font-bold">
+                        {formatCurrency(transaction.amount)}
+                      </p>
+                    </div>
+
+                    {/* Menu button to edit and delete functionality */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Ellipsis className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => handleEditTransaction(transaction)}
+                          className="cursor-pointer"
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteTransaction(transaction)}
+                          className="cursor-pointer"
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </motion.div>
+                ))}
+              </Fragment>
+            ));
+          }, [transactionList])}
         </CardContent>
       </Card>
     );
@@ -813,3 +819,62 @@ const TransactionsList = memo(
 );
 
 TransactionsList.displayName = "TransactionsList";
+
+// Helpers for rendering date headers in a single-pass map
+function dateLabel(iso: string): string {
+  const date = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  const isSameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+
+  if (isSameDay(date, today)) return "Today";
+  if (isSameDay(date, yesterday)) return "Yesterday";
+  return formatDate(date);
+}
+
+function dateKey(iso: string): string {
+  // Use local day so headers align with what users see
+  return new Date(iso).toDateString();
+}
+
+function DateHeader({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-4 py-3 opacity-50">
+      <Separator className="flex-1" />
+      <span className="text-muted-foreground text-sm font-medium">{label}</span>
+      <Separator className="flex-1" />
+    </div>
+  );
+}
+
+function groupTransactionsByDate(transactions: Array<Transaction>) {
+  const sections: Array<{
+    key: string;
+    label: string;
+    items: Array<Transaction>;
+  }> = [];
+
+  let currentKey: string | null = null;
+  
+  let current: {
+    key: string;
+    label: string;
+    items: Array<Transaction>;
+  } | null = null;
+
+  for (const t of transactions) {
+    const key = dateKey(t.date);
+    if (key !== currentKey) {
+      currentKey = key;
+      current = { key, label: dateLabel(t.date), items: [] };
+      sections.push(current);
+    }
+    current!.items.push(t);
+  }
+  return sections;
+}
