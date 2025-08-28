@@ -42,7 +42,14 @@ import {
 } from "~/components/ui/select";
 import { Calendar } from "~/components/ui/calendar";
 import { parseDate } from "chrono-node";
-import { Fragment, memo, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Popover,
   PopoverContent,
@@ -762,7 +769,12 @@ const TransactionsList = memo(
             } as const;
 
             return (
-              <motion.div variants={container} initial="hidden" animate="show" className="space-y-2">
+              <motion.div
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className="space-y-2"
+              >
                 {sections.map((section) => (
                   <Fragment key={section.key}>
                     <motion.div variants={headerVariant}>
@@ -788,7 +800,9 @@ const TransactionsList = memo(
 
                         {/* Merchant Name and Description */}
                         <div className="flex flex-3/5 flex-col">
-                          <p className="font-bold">{transaction.merchantName}</p>
+                          <p className="font-bold">
+                            {transaction.merchantName}
+                          </p>
                           <p className="text-muted-foreground text-sm">
                             {transaction.description}
                           </p>
@@ -816,7 +830,9 @@ const TransactionsList = memo(
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleDeleteTransaction(transaction)}
+                              onClick={() =>
+                                handleDeleteTransaction(transaction)
+                              }
                               className="cursor-pointer"
                             >
                               Delete
@@ -860,7 +876,13 @@ function dateKey(iso: string): string {
   return new Date(iso).toDateString();
 }
 
-function DateHeader({ label, className }: { label: string, className?: string }) {
+function DateHeader({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}) {
   return (
     <div className={cn("flex items-center gap-4 py-3 opacity-50", className)}>
       <Separator className="flex-1" />
@@ -878,7 +900,7 @@ function groupTransactionsByDate(transactions: Array<Transaction>) {
   }> = [];
 
   let currentKey: string | null = null;
-  
+
   let current: {
     key: string;
     label: string;
