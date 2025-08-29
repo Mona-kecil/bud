@@ -164,7 +164,7 @@
 
 html {
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 16px;
   overscroll-behavior-y: none;
 }
 
@@ -172,9 +172,4 @@ body {
   letter-spacing: var(--tracking-normal);
   padding-top: env(safe-area-inset-top);
   overscroll-behavior-y: none;
-}
-
-.hf-hand {
-  font-family: var(--font-hand);
-  letter-spacing: 0.2px;
 }
