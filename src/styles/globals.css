@@ -164,7 +164,7 @@
 
 html {
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 16px; /* 16px is the minimum font size for iOS (or weird shit would happen where the page is zoomed in on every interaction)*/
   overscroll-behavior-y: none;
 }
 

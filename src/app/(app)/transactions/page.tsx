@@ -8,6 +8,7 @@ import {
   Ellipsis,
   ChevronsUpDownIcon,
   CheckIcon,
+  Plus,
 } from "lucide-react";
 import {
   Card,
@@ -49,6 +50,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useRef,
 } from "react";
 import {
   Popover,
@@ -73,7 +75,6 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "~/components/ui/drawer";
 import {
   Command,
@@ -99,6 +100,8 @@ export default function TransactionsPage() {
   const [dialogState, setDialogState] = useState<DialogState>({
     mode: "create",
   });
+
+  const { isFabVisible, bottomSentinelRef } = useScrollDirectionVisibility();
 
   return (
     <>
@@ -132,6 +135,31 @@ export default function TransactionsPage() {
           setIsDialogOpen={setIsDialogOpen}
         />
       )}
+
+      {/* Bottom sentinel to force-show FAB at end of list */}
+      <div ref={bottomSentinelRef} className="h-1 w-1 opacity-0" />
+
+      {/* Spacer so last item isn't covered by FAB */}
+      <div className="h-[calc(env(safe-area-inset-bottom)+24px)]" />
+
+      {/* FAB - left side, hide on scroll down, show on scroll up */}
+      <Button
+        aria-label="Add transaction"
+        className={cn(
+          "fixed left-4 z-50 h-12 w-12 rounded-full shadow-lg",
+          "bottom-[calc(env(safe-area-inset-bottom)+72px)]",
+          "transition-all duration-200",
+          isFabVisible
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-6 opacity-0",
+        )}
+        onClick={() => {
+          setDialogState({ mode: "create" });
+          setIsDialogOpen(true);
+        }}
+      >
+        <Plus className="h-5 w-5" />
+      </Button>
     </>
   );
 }
@@ -302,17 +330,6 @@ function TransactionDialog({
 
   return (
     <Drawer open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DrawerTrigger asChild>
-        <Button
-          onClick={() => {
-            setDialogState({ mode: "create" });
-            setIsDialogOpen(true);
-          }}
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Transaction
-        </Button>
-      </DrawerTrigger>
       <DrawerContent aria-describedby={undefined} className="w-full">
         <DrawerHeader className="text-left">
           <DrawerTitle className="font-hand">
@@ -917,4 +934,71 @@ function groupTransactionsByDate(transactions: Array<Transaction>) {
     current!.items.push(t);
   }
   return sections;
+}
+
+function useScrollDirectionVisibility() {
+  const [isFabVisible, setIsFabVisible] = useState(true);
+  const lastYRef = useRef(0);
+  const tickingRef = useRef(false);
+  const visibleRef = useRef(true);
+  const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * This hook is used to:
+   * - Get current scroll level
+   * - Use requestAnimationFrame to batch reads/writes and avoid jank
+   * - Toggle FAB visibility based on scroll direction with a small threshold
+   * - Force-show the FAB when reaching the end of the list so it doesn't hide
+   */
+  useEffect(() => {
+    lastYRef.current = window.scrollY;
+    const onScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const diff = currentY - lastYRef.current;
+        const threshold = 10; // small movement threshold to avoid jitter
+        const doc = document.documentElement;
+        const atBottom = window.innerHeight + currentY >= doc.scrollHeight - 2;
+        if (diff > threshold && visibleRef.current) {
+          visibleRef.current = false;
+          setIsFabVisible(false);
+        } else if (diff < -threshold && !visibleRef.current) {
+          visibleRef.current = true;
+          setIsFabVisible(true);
+        }
+        if (atBottom && !visibleRef.current) {
+          visibleRef.current = true;
+          setIsFabVisible(true);
+        }
+        lastYRef.current = currentY;
+        tickingRef.current = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const target = bottomSentinelRef.current;
+    if (!target) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (!visibleRef.current) {
+              visibleRef.current = true;
+              setIsFabVisible(true);
+            }
+          }
+        }
+      },
+      { root: null, threshold: 0 },
+    );
+    io.observe(target);
+    return () => io.disconnect();
+  }, []);
+
+  return { isFabVisible, bottomSentinelRef } as const;
 }
