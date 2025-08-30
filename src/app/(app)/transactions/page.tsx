@@ -10,6 +10,7 @@ import {
   CheckIcon,
   Plus,
   SearchIcon,
+  FilterIcon,
 } from "lucide-react";
 import {
   Card,
@@ -76,6 +77,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from "~/components/ui/drawer";
 import {
   Command,
@@ -638,6 +640,13 @@ function TransactionDialog({
             />
 
             <DrawerFooter className="flex w-full justify-end gap-4 pt-2">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting
+                  ? "Submitting..."
+                  : dialogState.mode === "create"
+                    ? "Create"
+                    : "Update"}
+              </Button>
               <Button
                 variant="outline"
                 type="reset"
@@ -662,13 +671,6 @@ function TransactionDialog({
                 disabled={isSubmitting}
               >
                 Clear
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting
-                  ? "Submitting..."
-                  : dialogState.mode === "create"
-                    ? "Create"
-                    : "Update"}
               </Button>
             </DrawerFooter>
           </form>
@@ -1024,16 +1026,34 @@ function SearchBar({
   searchTerm: string;
   setSearchTerm: (searchTerm: string) => void;
 }) {
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   return (
     <div className="flex items-center gap-2">
       <SearchIcon className="absolute left-7 h-4 w-4" />
       <Input
         type="search"
         placeholder="Search transactions..."
-        className="border-input w-full border pl-8"
+        className="ring-offset-ring/50 w-full pl-8 ring-offset-1"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+      <Drawer open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+        <DrawerTrigger>
+          <Button variant="outline" size="icon" className="opacity-50">
+            <FilterIcon className="h-4 w-4" />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Filter Transactions</DrawerTitle>
+            <DrawerDescription>Not yet implemented :p</DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter>
+            <Button>Apply</Button>
+            <Button variant="outline">Reset</Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
