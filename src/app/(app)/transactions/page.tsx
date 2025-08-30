@@ -9,6 +9,7 @@ import {
   ChevronsUpDownIcon,
   CheckIcon,
   Plus,
+  SearchIcon,
 } from "lucide-react";
 import {
   Card,
@@ -734,6 +735,8 @@ const TransactionsList = memo(
   }) => {
     const deleteTransaction = useMutation(api.transactions.deleteTransaction);
 
+    const [searchTerm, setSearchTerm] = useState("");
+
     const handleEditTransaction = useCallback(
       (transaction: Transaction) => {
         setDialogState({ mode: "edit", transaction });
@@ -759,17 +762,28 @@ const TransactionsList = memo(
       [deleteTransaction],
     );
 
+    if (searchTerm) {
+      transactionList = transactionList.filter(
+        (transaction) =>
+          transaction.merchantName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          transaction.description
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()),
+      );
+    }
+
     return (
       <Card>
         <CardHeader>
           <CardTitle className="font-hand">All Transactions</CardTitle>
-
           <CardDescription>
             View and manage all your financial transactions
           </CardDescription>
         </CardHeader>
-
         <CardContent className="space-y-2">
+          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           {useMemo(() => {
             const sections = groupTransactionsByDate(transactionList);
             const container = {
@@ -825,7 +839,7 @@ const TransactionsList = memo(
                           </p>
                         </div>
 
-                        {/* Amount and Date */}
+                        {/* Amount */}
                         <div>
                           <p className="font-bold">
                             {formatCurrency(transaction.amount)}
@@ -862,7 +876,7 @@ const TransactionsList = memo(
                 ))}
               </motion.div>
             );
-          }, [transactionList])}
+          }, [transactionList, handleEditTransaction, handleDeleteTransaction])}
         </CardContent>
       </Card>
     );
@@ -1001,4 +1015,25 @@ function useScrollDirectionVisibility() {
   }, []);
 
   return { isFabVisible, bottomSentinelRef } as const;
+}
+
+function SearchBar({
+  searchTerm,
+  setSearchTerm,
+}: {
+  searchTerm: string;
+  setSearchTerm: (searchTerm: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <SearchIcon className="absolute left-7 h-4 w-4" />
+      <Input
+        type="search"
+        placeholder="Search transactions..."
+        className="border-input w-full border pl-8"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+    </div>
+  );
 }
