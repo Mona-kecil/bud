@@ -34,7 +34,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Ellipsis, Plus, PlusCircleIcon } from "lucide-react";
+import { Ellipsis, Loader2, Plus, PlusCircleIcon } from "lucide-react";
 import { Progress } from "~/components/ui/progress";
 import {
   DropdownMenu,
@@ -431,7 +431,11 @@ function BudgetDialog({
 }
 
 function LoadingState() {
-  return <div>Loading...</div>;
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <Loader2 className="h-10 w-10 animate-spin" />
+    </div>
+  );
 }
 
 function EmptyState({

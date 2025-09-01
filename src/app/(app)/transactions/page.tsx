@@ -11,6 +11,7 @@ import {
   Plus,
   SearchIcon,
   FilterIcon,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -683,8 +684,8 @@ function TransactionDialog({
 function LoadingState() {
   return (
     <>
-      <div className="flex flex-col gap-4">
-        <Skeleton className="h-dvh w-full" />
+      <div className="flex flex-col items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
       </div>
     </>
   );

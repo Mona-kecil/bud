@@ -1,4 +1,4 @@
-import { PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -37,6 +37,7 @@ function Todo() {
 }
 
 export default function AccountsPage() {
+  return <LoadingState />;
   return <Todo />;
   return (
     <div className="space-y-4">
@@ -120,6 +121,14 @@ export default function AccountsPage() {
           <AccountsOverview showAll={true} />
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <Loader2 className="h-10 w-10 animate-spin" />
     </div>
   );
 }
