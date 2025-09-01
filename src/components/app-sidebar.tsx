@@ -12,10 +12,6 @@ import {
 import { NavMain } from "~/components/nav-main";
 import { Sidebar, SidebarContent, SidebarRail } from "~/components/ui/sidebar";
 
-// This is sample data.
-// TODO: Replace with actual user data
-// TODO: Replace navigation with actual pages
-// TODO: Remove projects Section
 export const NAV_ITEMS = [
   {
     title: "Overview",

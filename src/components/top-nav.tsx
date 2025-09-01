@@ -12,7 +12,9 @@ export default function TopNav() {
     pathname.slice(1, 2).toLocaleUpperCase() + pathname.slice(2);
 
   const onSettingButtonClicked = () => {
-    toast.message("We don't have this feature yet 😭");
+    toast.info("We don't have this feature yet 😭", {
+      position: "top-center",
+    });
   };
 
   return (
