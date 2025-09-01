@@ -11,7 +11,7 @@ import { formatCurrency } from "~/lib/utils";
 import type { Id } from "convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
-import { memo, useCallback, useEffect, useState, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,6 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
 import {
@@ -35,7 +34,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Ellipsis, PlusCircleIcon } from "lucide-react";
+import { Ellipsis, Plus, PlusCircleIcon } from "lucide-react";
 import { Progress } from "~/components/ui/progress";
 import {
   DropdownMenu,
@@ -60,6 +59,7 @@ export default function BudgetsPage() {
   const [dialogState, setDialogState] = useState<DialogState>({
     mode: "create",
   });
+  const { isFabVisible, bottomSentinelRef } = useScrollDirectionVisibility();
 
   // Loading state
   if (budgetList === undefined) return <LoadingState />;
@@ -67,10 +67,37 @@ export default function BudgetsPage() {
   // Empty state
   if (budgetList && budgetList.length === 0)
     return (
-      <EmptyState
-        setIsDialogOpen={setIsDialogOpen}
-        setDialogState={setDialogState}
-      />
+      <>
+        <EmptyState
+          setIsDialogOpen={setIsDialogOpen}
+          setDialogState={setDialogState}
+        />
+        <BudgetDialog
+          dialogState={dialogState}
+          setDialogState={setDialogState}
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+        />
+        <div ref={bottomSentinelRef} className="h-1 w-1 opacity-0" />
+        <div className="h-[calc(env(safe-area-inset-bottom)+24px)]" />
+        <Button
+          aria-label="Add budget"
+          className={cn(
+            "fixed left-4 z-50 h-12 w-12 rounded-full shadow-lg",
+            "bottom-[calc(env(safe-area-inset-bottom)+72px)]",
+            "transition-all duration-200",
+            isFabVisible
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-6 opacity-0",
+          )}
+          onClick={() => {
+            setDialogState({ mode: "create" });
+            setIsDialogOpen(true);
+          }}
+        >
+          <Plus className="h-5 w-5" />
+        </Button>
+      </>
     );
 
   return (
@@ -83,15 +110,33 @@ export default function BudgetsPage() {
           setDialogState={setDialogState}
           setIsDialogOpen={setIsDialogOpen}
           spendByBudget={spendByBudget}
-        >
-          <BudgetDialog
-            dialogState={dialogState}
-            setDialogState={setDialogState}
-            isDialogOpen={isDialogOpen}
-            setIsDialogOpen={setIsDialogOpen}
-          />
-        </BudgetsList>
+        />
       )}
+      <BudgetDialog
+        dialogState={dialogState}
+        setDialogState={setDialogState}
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+      />
+      <div ref={bottomSentinelRef} className="h-1 w-1 opacity-0" />
+      <div className="h-[calc(env(safe-area-inset-bottom)+24px)]" />
+      <Button
+        aria-label="Add budget"
+        className={cn(
+          "fixed left-4 z-50 h-12 w-12 rounded-full shadow-lg",
+          "bottom-[calc(env(safe-area-inset-bottom)+72px)]",
+          "transition-all duration-200",
+          isFabVisible
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-6 opacity-0",
+        )}
+        onClick={() => {
+          setDialogState({ mode: "create" });
+          setIsDialogOpen(true);
+        }}
+      >
+        <Plus className="h-5 w-5" />
+      </Button>
     </>
   );
 }
@@ -297,20 +342,6 @@ function BudgetDialog({
 
   return (
     <Drawer open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DrawerTrigger asChild>
-        <div className="flex items-center justify-center pt-2">
-          <Button
-            onClick={() => {
-              setDialogState({ mode: "create" });
-              setIsDialogOpen(true);
-            }}
-            className="w-full"
-          >
-            <PlusCircleIcon />
-            Add another budget
-          </Button>
-        </div>
-      </DrawerTrigger>
       <DrawerContent aria-describedby={undefined} className="w-full">
         <DrawerHeader className="text-left">
           <DrawerTitle>
@@ -443,13 +474,11 @@ const BudgetsList = memo(
     setDialogState,
     setIsDialogOpen,
     spendByBudget,
-    children,
   }: {
     budgetList: Budget[];
     setDialogState: (state: DialogState) => void;
     setIsDialogOpen: (open: boolean) => void;
     spendByBudget?: Record<string, number>;
-    children: ReactNode;
   }) => {
     const deleteBudget = useMutation(api.budgets.deleteBudget);
 
@@ -564,7 +593,6 @@ const BudgetsList = memo(
               </div>
             );
           })}
-          {children}
         </CardContent>
       </Card>
     );
@@ -572,3 +600,63 @@ const BudgetsList = memo(
 );
 
 BudgetsList.displayName = "BudgetsList";
+
+function useScrollDirectionVisibility() {
+  const [isFabVisible, setIsFabVisible] = useState(true);
+  const lastYRef = useRef(0);
+  const tickingRef = useRef(false);
+  const visibleRef = useRef(true);
+  const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    lastYRef.current = window.scrollY;
+    const onScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const diff = currentY - lastYRef.current;
+        const threshold = 10;
+        const doc = document.documentElement;
+        const atBottom = window.innerHeight + currentY >= doc.scrollHeight - 2;
+        if (diff > threshold && visibleRef.current) {
+          visibleRef.current = false;
+          setIsFabVisible(false);
+        } else if (diff < -threshold && !visibleRef.current) {
+          visibleRef.current = true;
+          setIsFabVisible(true);
+        }
+        if (atBottom && !visibleRef.current) {
+          visibleRef.current = true;
+          setIsFabVisible(true);
+        }
+        lastYRef.current = currentY;
+        tickingRef.current = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const target = bottomSentinelRef.current;
+    if (!target) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (!visibleRef.current) {
+              visibleRef.current = true;
+              setIsFabVisible(true);
+            }
+          }
+        }
+      },
+      { root: null, threshold: 0 },
+    );
+    io.observe(target);
+    return () => io.disconnect();
+  }, []);
+
+  return { isFabVisible, bottomSentinelRef } as const;
+}

@@ -12,8 +12,32 @@ import { AccountsOverview } from "~/components/accounts-overview";
 import { mockAccounts } from "~/lib/mock-data";
 import { formatCurrency } from "~/lib/utils";
 
+function Todo() {
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Accounts Page</CardTitle>
+          <CardDescription>
+            Accounts page is a place where user can list their financial
+            accounts. Then in transactions page, user can link each transaction
+            to an account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div>Coming soon!</div>
+          Example: bank account, cash. etc. Then user can link each expense to
+          an account. <br />
+          Example: Expense: IDR 300.000, Account: Bank Account. <br />
+          Example: Income: IDR 300.000, Account: Cash. <br />
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
 export default function AccountsPage() {
-  return <div>Coming soon!</div>;
+  return <Todo />;
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

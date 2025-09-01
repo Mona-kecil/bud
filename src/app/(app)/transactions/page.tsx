@@ -1038,7 +1038,7 @@ function SearchBar({
         onChange={(e) => setSearchTerm(e.target.value)}
       />
       <Drawer open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
           <Button variant="outline" size="icon" className="opacity-50">
             <FilterIcon className="h-4 w-4" />
           </Button>
