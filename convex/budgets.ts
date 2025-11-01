@@ -215,8 +215,77 @@ export const deleteBudget = mutation({
   },
 });
 
-export const getBudgetSpend = query({
+export const getAvailableMonths = query({
   args: {},
+  returns: v.array(
+    v.object({
+      year: v.number(),
+      month: v.number(),
+    }),
+  ),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token_identifier", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
+      )
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Get user registration date from _creationTime (system field)
+    const userCreationTime = user._creationTime;
+    const userCreationDate = new Date(userCreationTime);
+    const now = new Date();
+
+    // Generate all months from user registration to current month
+    const months: Array<{ year: number; month: number }> = [];
+    const currentYear = now.getUTCFullYear();
+    const currentMonth = now.getUTCMonth();
+    const startYear = userCreationDate.getUTCFullYear();
+    const startMonth = userCreationDate.getUTCMonth();
+
+    // Iterate from user creation date to current month
+    let year = startYear;
+    let month = startMonth;
+
+    while (
+      year < currentYear ||
+      (year === currentYear && month <= currentMonth)
+    ) {
+      months.push({ year, month });
+
+      // Move to next month
+      month++;
+      if (month > 11) {
+        month = 0;
+        year++;
+      }
+    }
+
+    // Sort descending (most recent first)
+    months.sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year;
+      return b.month - a.month;
+    });
+
+    return months;
+  },
+});
+
+export const getBudgetSpend = query({
+  args: {
+    year: v.optional(v.number()),
+    month: v.optional(v.number()),
+  },
+  returns: v.record(v.string(), v.number()),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -234,14 +303,13 @@ export const getBudgetSpend = query({
       throw new Error("User not found");
     }
 
-    // Get current month date range for spendByBudget
+    // Get date range for specified month, or current month if not specified
     const now = new Date();
-    const startUtc = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
-    );
-    const endUtc = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0),
-    );
+    const targetYear = args.year ?? now.getUTCFullYear();
+    const targetMonth = args.month ?? now.getUTCMonth();
+
+    const startUtc = new Date(Date.UTC(targetYear, targetMonth, 1));
+    const endUtc = new Date(Date.UTC(targetYear, targetMonth + 1, 0));
 
     const toIsoDate = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -304,9 +372,12 @@ export const getTotalBudgets = query({
 });
 
 export const getTotalSpent = query({
-  args: {},
+  args: {
+    year: v.optional(v.number()),
+    month: v.optional(v.number()),
+  },
   returns: v.number(),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Unauthorized");
@@ -323,14 +394,13 @@ export const getTotalSpent = query({
       throw new Error("User not found");
     }
 
-    // Compute current month in YYYY-MM-DD to match stored string dates
+    // Compute date range for specified month, or current month if not specified
     const now = new Date();
-    const startUtc = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
-    );
-    const endUtc = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0),
-    );
+    const targetYear = args.year ?? now.getUTCFullYear();
+    const targetMonth = args.month ?? now.getUTCMonth();
+
+    const startUtc = new Date(Date.UTC(targetYear, targetMonth, 1));
+    const endUtc = new Date(Date.UTC(targetYear, targetMonth + 1, 0));
     const toIsoDate = (d: Date) => d.toISOString().slice(0, 10);
     const startDate = toIsoDate(startUtc);
     const endDate = toIsoDate(endUtc);

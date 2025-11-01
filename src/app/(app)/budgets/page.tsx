@@ -42,6 +42,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
 type Budget = { _id: Id<"budgets">; name: string; amount?: number };
@@ -52,8 +59,33 @@ type DialogState = {
 };
 
 export default function BudgetsPage() {
+  const now = new Date();
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+
+  const availableMonths = useQuery(api.budgets.getAvailableMonths, {});
   const budgetList = useQuery(api.budgets.getAvailableBudgets, {});
-  const spendByBudget = useQuery(api.budgets.getBudgetSpend, {});
+
+  // Sync selected month with available months when they load
+  useEffect(() => {
+    if (availableMonths && availableMonths.length > 0) {
+      const currentMonthExists = availableMonths.some(
+        (m) => m.year === selectedYear && m.month === selectedMonth,
+      );
+      if (!currentMonthExists) {
+        // Default to the most recent month (first in sorted array)
+        const firstMonth = availableMonths[0]!;
+        setSelectedYear(firstMonth.year);
+        setSelectedMonth(firstMonth.month);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableMonths]);
+
+  const spendByBudget = useQuery(api.budgets.getBudgetSpend, {
+    year: selectedYear,
+    month: selectedMonth,
+  });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogState, setDialogState] = useState<DialogState>({
@@ -62,7 +94,8 @@ export default function BudgetsPage() {
   const { isFabVisible, bottomSentinelRef } = useScrollDirectionVisibility();
 
   // Loading state
-  if (budgetList === undefined) return <LoadingState />;
+  if (budgetList === undefined || availableMonths === undefined)
+    return <LoadingState />;
 
   // Empty state
   if (budgetList && budgetList.length === 0)
@@ -102,7 +135,16 @@ export default function BudgetsPage() {
 
   return (
     <>
-      <BudgetMetrics />
+      <MonthSelector
+        availableMonths={availableMonths}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        onMonthChange={(year, month) => {
+          setSelectedYear(year);
+          setSelectedMonth(month);
+        }}
+      />
+      <BudgetMetrics year={selectedYear} month={selectedMonth} />
 
       {budgetList && budgetList.length > 0 && (
         <BudgetsList
@@ -141,9 +183,74 @@ export default function BudgetsPage() {
   );
 }
 
-function BudgetMetrics() {
-  const totalBudgeted = useQuery(api.budgets.getTotalBudgets, {})!;
-  const totalSpent = useQuery(api.budgets.getTotalSpent, {})!;
+function MonthSelector({
+  availableMonths,
+  selectedYear,
+  selectedMonth,
+  onMonthChange,
+}: {
+  availableMonths?: Array<{ year: number; month: number }>;
+  selectedYear: number;
+  selectedMonth: number;
+  onMonthChange: (year: number, month: number) => void;
+}) {
+  const formatMonthLabel = (year: number, month: number) => {
+    const date = new Date(year, month, 1);
+    return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  };
+
+  const selectedValue = `${selectedYear}-${selectedMonth}`;
+
+  if (!availableMonths || availableMonths.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mb-4">
+      <Select
+        value={selectedValue}
+        onValueChange={(value) => {
+          const [year, month] = value.split("-").map(Number);
+          onMonthChange(year!, month!);
+        }}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue>
+            {formatMonthLabel(selectedYear, selectedMonth)}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {availableMonths.map(({ year, month }) => {
+            const value = `${year}-${month}`;
+            return (
+              <SelectItem key={value} value={value}>
+                {formatMonthLabel(year, month)}
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+function BudgetMetrics({
+  year,
+  month,
+}: {
+  year: number;
+  month: number;
+}) {
+  const totalBudgeted = useQuery(api.budgets.getTotalBudgets, {});
+  const totalSpent = useQuery(api.budgets.getTotalSpent, {
+    year,
+    month,
+  });
+
+  if (totalBudgeted === undefined || totalSpent === undefined) {
+    return <LoadingState />;
+  }
+
   const remaining = totalBudgeted - totalSpent;
   // budgetHealth: percentage of budget remaining (100 = all budget left, 0 = fully spent, <0 = overspent)
   // rawBudgetHealth may be negative when overspent; clamp displayed value to max 100
