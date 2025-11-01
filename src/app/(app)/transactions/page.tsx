@@ -12,6 +12,7 @@ import {
   SearchIcon,
   FilterIcon,
   Loader2,
+  X,
 } from "lucide-react";
 import {
   Card,
@@ -37,6 +38,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -81,6 +83,15 @@ import {
   DrawerTrigger,
 } from "~/components/ui/drawer";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -97,7 +108,22 @@ type DialogState = {
 };
 
 export default function TransactionsPage() {
-  const transactionList = useQuery(api.transactions.getAllTransactions, {});
+  // Filter state
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [startDate, setStartDate] = useState<string | undefined>(undefined);
+  const [endDate, setEndDate] = useState<string | undefined>(undefined);
+  const [minAmount, setMinAmount] = useState<number | undefined>(undefined);
+  const [maxAmount, setMaxAmount] = useState<number | undefined>(undefined);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const transactionList = useQuery(api.transactions.getAllTransactions, {
+    categoryId: categoryId as Id<"budgets"> | undefined,
+    startDate,
+    endDate,
+    min_amount: minAmount,
+    max_amount: maxAmount,
+    sortOrder,
+  });
 
   // Dialog state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -137,6 +163,18 @@ export default function TransactionsPage() {
           transactionList={transactionList}
           setDialogState={setDialogState}
           setIsDialogOpen={setIsDialogOpen}
+          categoryId={categoryId}
+          startDate={startDate}
+          endDate={endDate}
+          minAmount={minAmount}
+          maxAmount={maxAmount}
+          sortOrder={sortOrder}
+          setCategoryId={setCategoryId}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
+          setMinAmount={setMinAmount}
+          setMaxAmount={setMaxAmount}
+          setSortOrder={setSortOrder}
         />
       )}
 
@@ -731,10 +769,34 @@ const TransactionsList = memo(
     transactionList,
     setDialogState,
     setIsDialogOpen,
+    categoryId,
+    startDate,
+    endDate,
+    minAmount,
+    maxAmount,
+    sortOrder,
+    setCategoryId,
+    setStartDate,
+    setEndDate,
+    setMinAmount,
+    setMaxAmount,
+    setSortOrder,
   }: {
     transactionList: Transaction[];
     setDialogState: (state: DialogState) => void;
     setIsDialogOpen: (open: boolean) => void;
+    categoryId: string | undefined;
+    startDate: string | undefined;
+    endDate: string | undefined;
+    minAmount: number | undefined;
+    maxAmount: number | undefined;
+    sortOrder: "asc" | "desc";
+    setCategoryId: (value: string | undefined) => void;
+    setStartDate: (value: string | undefined) => void;
+    setEndDate: (value: string | undefined) => void;
+    setMinAmount: (value: number | undefined) => void;
+    setMaxAmount: (value: number | undefined) => void;
+    setSortOrder: (value: "asc" | "desc") => void;
   }) => {
     const deleteTransaction = useMutation(api.transactions.deleteTransaction);
 
@@ -786,7 +848,22 @@ const TransactionsList = memo(
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <SearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            categoryId={categoryId}
+            startDate={startDate}
+            endDate={endDate}
+            minAmount={minAmount}
+            maxAmount={maxAmount}
+            sortOrder={sortOrder}
+            setCategoryId={setCategoryId}
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
+            setMinAmount={setMinAmount}
+            setMaxAmount={setMaxAmount}
+            setSortOrder={setSortOrder}
+          />
           {useMemo(() => {
             const sections = groupTransactionsByDate(transactionList);
             const container = {
@@ -1023,35 +1100,406 @@ function useScrollDirectionVisibility() {
 function SearchBar({
   searchTerm,
   setSearchTerm,
+  categoryId,
+  startDate,
+  endDate,
+  minAmount,
+  maxAmount,
+  sortOrder,
+  setCategoryId,
+  setStartDate,
+  setEndDate,
+  setMinAmount,
+  setMaxAmount,
+  setSortOrder,
 }: {
   searchTerm: string;
   setSearchTerm: (searchTerm: string) => void;
+  categoryId: string | undefined;
+  startDate: string | undefined;
+  endDate: string | undefined;
+  minAmount: number | undefined;
+  maxAmount: number | undefined;
+  sortOrder: "asc" | "desc";
+  setCategoryId: (value: string | undefined) => void;
+  setStartDate: (value: string | undefined) => void;
+  setEndDate: (value: string | undefined) => void;
+  setMinAmount: (value: number | undefined) => void;
+  setMaxAmount: (value: number | undefined) => void;
+  setSortOrder: (value: "asc" | "desc") => void;
 }) {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
+  const getAvailableCategories = useQuery(api.budgets.getAvailableBudgets, {});
+
+  // Local state for filter drawer (before applying)
+  const [localCategoryId, setLocalCategoryId] = useState<string | undefined>(
+    categoryId,
+  );
+  const [localStartDate, setLocalStartDate] = useState<Date | undefined>(
+    startDate ? new Date(startDate) : undefined,
+  );
+  const [localEndDate, setLocalEndDate] = useState<Date | undefined>(
+    endDate ? new Date(endDate) : undefined,
+  );
+  const [localMinAmount, setLocalMinAmount] = useState<string>(
+    minAmount ? formatCurrency(minAmount) : "",
+  );
+  const [localMaxAmount, setLocalMaxAmount] = useState<string>(
+    maxAmount ? formatCurrency(maxAmount) : "",
+  );
+  const [localSortOrder, setLocalSortOrder] = useState<"asc" | "desc">(
+    sortOrder,
+  );
+
+  // Date picker states
+  const [startDatePickerOpen, setStartDatePickerOpen] = useState(false);
+  const [endDatePickerOpen, setEndDatePickerOpen] = useState(false);
+  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
+
+  // Sync local state when filters change externally
+  useEffect(() => {
+    setLocalCategoryId(categoryId);
+    setLocalStartDate(startDate ? new Date(startDate) : undefined);
+    setLocalEndDate(endDate ? new Date(endDate) : undefined);
+    setLocalMinAmount(minAmount ? formatCurrency(minAmount) : "");
+    setLocalMaxAmount(maxAmount ? formatCurrency(maxAmount) : "");
+    setLocalSortOrder(sortOrder);
+  }, [categoryId, startDate, endDate, minAmount, maxAmount, sortOrder]);
+
+  const hasActiveFilters =
+    searchTerm !== "" ||
+    categoryId !== undefined ||
+    startDate !== undefined ||
+    endDate !== undefined ||
+    minAmount !== undefined ||
+    maxAmount !== undefined ||
+    sortOrder !== "desc";
+
+  const handleApplyFilters = () => {
+    setCategoryId(localCategoryId);
+    setStartDate(
+      localStartDate ? localStartDate.toISOString().slice(0, 10) : undefined,
+    );
+    setEndDate(
+      localEndDate ? localEndDate.toISOString().slice(0, 10) : undefined,
+    );
+    setMinAmount(
+      localMinAmount
+        ? parseInt(localMinAmount.replace(/[^\d]/g, ""), 10) || undefined
+        : undefined,
+    );
+    setMaxAmount(
+      localMaxAmount
+        ? parseInt(localMaxAmount.replace(/[^\d]/g, ""), 10) || undefined
+        : undefined,
+    );
+    setSortOrder(localSortOrder);
+    setIsFilterDrawerOpen(false);
+  };
+
+  const handleResetFilters = () => {
+    setLocalCategoryId(undefined);
+    setLocalStartDate(undefined);
+    setLocalEndDate(undefined);
+    setLocalMinAmount("");
+    setLocalMaxAmount("");
+    setLocalSortOrder("desc");
+    setCategoryId(undefined);
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setMinAmount(undefined);
+    setMaxAmount(undefined);
+    setSortOrder("desc");
+    setIsFilterDrawerOpen(false);
+  };
+
+  const handleClearAllFilters = () => {
+    // Reset local state
+    setLocalCategoryId(undefined);
+    setLocalStartDate(undefined);
+    setLocalEndDate(undefined);
+    setLocalMinAmount("");
+    setLocalMaxAmount("");
+    setLocalSortOrder("desc");
+    // Reset actual filters
+    setCategoryId(undefined);
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setMinAmount(undefined);
+    setMaxAmount(undefined);
+    setSortOrder("desc");
+    setSearchTerm("");
+    setIsClearConfirmOpen(false);
+    toast.success("All filters cleared", {
+      position: "top-center",
+    });
+  };
+
   return (
     <div className="flex items-center gap-2">
-      <SearchIcon className="absolute left-7 h-4 w-4" />
-      <Input
-        type="search"
-        placeholder="Search transactions..."
-        className="ring-offset-ring/50 w-full pl-8 ring-offset-1"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+      <div className="relative flex-1">
+        <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+        <Input
+          type="search"
+          placeholder="Search transactions..."
+          className="ring-offset-ring/50 w-full pl-8 ring-offset-1"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+      {hasActiveFilters && (
+        <Dialog open={isClearConfirmOpen} onOpenChange={setIsClearConfirmOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="icon" title="Clear all filters">
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Clear All Filters?</DialogTitle>
+              <DialogDescription>
+                This will clear all filters and search terms. This action cannot
+                be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsClearConfirmOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleClearAllFilters}>
+                Clear All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
       <Drawer open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
         <DrawerTrigger asChild>
-          <Button variant="outline" size="icon" className="opacity-50">
+          <Button
+            variant="outline"
+            size="icon"
+            className={hasActiveFilters ? "" : "opacity-50"}
+          >
             <FilterIcon className="h-4 w-4" />
           </Button>
         </DrawerTrigger>
-        <DrawerContent>
+        <DrawerContent className="max-h-[90vh]">
           <DrawerHeader>
             <DrawerTitle>Filter Transactions</DrawerTitle>
-            <DrawerDescription>Not yet implemented :p</DrawerDescription>
+            <DrawerDescription>
+              Filter transactions by category, date range, amount, and sort
+              order
+            </DrawerDescription>
           </DrawerHeader>
-          <DrawerFooter>
-            <Button>Apply</Button>
-            <Button variant="outline">Reset</Button>
+          <div className="overflow-y-auto px-4 py-4">
+            <div className="space-y-6">
+              {/* Category Filter */}
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Popover open={categoryPopoverOpen} onOpenChange={setCategoryPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className="w-full justify-between"
+                    >
+                      {localCategoryId
+                        ? getAvailableCategories?.find(
+                            (cat) => String(cat._id) === localCategoryId,
+                          )?.name
+                        : "All Categories"}
+                      <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search category..." />
+                      <CommandList>
+                        <CommandEmpty>No category found.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            value="all"
+                            onSelect={() => {
+                              setLocalCategoryId(undefined);
+                              setCategoryPopoverOpen(false);
+                            }}
+                          >
+                            <CheckIcon
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                localCategoryId === undefined
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            All Categories
+                          </CommandItem>
+                          {getAvailableCategories?.map((cat) => (
+                            <CommandItem
+                              key={cat._id}
+                              value={cat.name}
+                              onSelect={() => {
+                                setLocalCategoryId(String(cat._id));
+                                setCategoryPopoverOpen(false);
+                              }}
+                            >
+                              <CheckIcon
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  localCategoryId === String(cat._id)
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              {cat.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Date Range Filter */}
+              <div className="space-y-4">
+                <Label>Date Range</Label>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-normal">Start Date</Label>
+                    <Popover
+                      open={startDatePickerOpen}
+                      onOpenChange={setStartDatePickerOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {localStartDate ? (
+                            formatDate(localStartDate.toISOString())
+                          ) : (
+                            <span className="text-muted-foreground">
+                              Pick a date
+                            </span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={localStartDate}
+                          onSelect={(date) => {
+                            setLocalStartDate(date);
+                            setStartDatePickerOpen(false);
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-normal">End Date</Label>
+                    <Popover
+                      open={endDatePickerOpen}
+                      onOpenChange={setEndDatePickerOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {localEndDate ? (
+                            formatDate(localEndDate.toISOString())
+                          ) : (
+                            <span className="text-muted-foreground">
+                              Pick a date
+                            </span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={localEndDate}
+                          onSelect={(date) => {
+                            setLocalEndDate(date);
+                            setEndDatePickerOpen(false);
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+
+              {/* Amount Range Filter */}
+              <div className="space-y-4">
+                <Label>Amount Range</Label>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-normal">Min Amount</Label>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Min amount"
+                      value={localMinAmount}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^\d]/g, "");
+                        const num = raw ? parseInt(raw, 10) : 0;
+                        setLocalMinAmount(num === 0 ? "" : formatCurrency(num));
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-normal">Max Amount</Label>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Max amount"
+                      value={localMaxAmount}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^\d]/g, "");
+                        const num = raw ? parseInt(raw, 10) : 0;
+                        setLocalMaxAmount(num === 0 ? "" : formatCurrency(num));
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sort Order */}
+              <div className="space-y-2">
+                <Label>Sort Order</Label>
+                <Select
+                  value={localSortOrder}
+                  onValueChange={(value: "asc" | "desc") =>
+                    setLocalSortOrder(value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Descending (Newest First)</SelectItem>
+                    <SelectItem value="asc">Ascending (Oldest First)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DrawerFooter className="gap-2">
+            <Button onClick={handleApplyFilters}>Apply Filters</Button>
+            <Button variant="outline" onClick={handleResetFilters}>
+              Reset Filters
+            </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

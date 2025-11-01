@@ -3,10 +3,12 @@ import { mutation, query } from "./_generated/server";
 
 export const getAllTransactions = query({
   args: {
+    categoryId: v.optional(v.id("budgets")),
     startDate: v.optional(v.string()),
     endDate: v.optional(v.string()),
     min_amount: v.optional(v.number()),
     max_amount: v.optional(v.number()),
+    sortOrder: v.optional(v.union(v.literal("asc"), v.literal("desc"))),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -25,11 +27,90 @@ export const getAllTransactions = query({
       throw new Error("User not found");
     }
 
-    const transactions = await ctx.db
-      .query("transactions")
-      .withIndex("by_user_date", (q) => q.eq("userId", user._id))
-      .order("desc")
-      .collect();
+    const sortOrder = args.sortOrder ?? "desc";
+
+    // Use appropriate index based on filters
+    let query;
+    const startDate = args.startDate;
+    const endDate = args.endDate;
+    if (args.categoryId) {
+      // Use category_date index when category is filtered
+      const categoryId = args.categoryId;
+      if (startDate && endDate) {
+        query = ctx.db
+          .query("transactions")
+          .withIndex("by_user_category_date", (q) =>
+            q
+              .eq("userId", user._id)
+              .eq("categoryId", categoryId)
+              .gte("date", startDate)
+              .lte("date", endDate),
+          );
+      } else if (startDate) {
+        query = ctx.db
+          .query("transactions")
+          .withIndex("by_user_category_date", (q) =>
+            q
+              .eq("userId", user._id)
+              .eq("categoryId", categoryId)
+              .gte("date", startDate),
+          );
+      } else if (endDate) {
+        query = ctx.db
+          .query("transactions")
+          .withIndex("by_user_category_date", (q) =>
+            q
+              .eq("userId", user._id)
+              .eq("categoryId", categoryId)
+              .lte("date", endDate),
+          );
+      } else {
+        query = ctx.db
+          .query("transactions")
+          .withIndex("by_user_category_date", (q) =>
+            q.eq("userId", user._id).eq("categoryId", categoryId),
+          );
+      }
+    } else {
+      // Use date index for date range filtering or default
+      if (startDate && endDate) {
+        query = ctx.db
+          .query("transactions")
+          .withIndex("by_user_date", (q) =>
+            q
+              .eq("userId", user._id)
+              .gte("date", startDate)
+              .lte("date", endDate),
+          );
+      } else if (startDate) {
+        query = ctx.db
+          .query("transactions")
+          .withIndex("by_user_date", (q) =>
+            q.eq("userId", user._id).gte("date", startDate),
+          );
+      } else if (endDate) {
+        query = ctx.db
+          .query("transactions")
+          .withIndex("by_user_date", (q) =>
+            q.eq("userId", user._id).lte("date", endDate),
+          );
+      } else {
+        query = ctx.db
+          .query("transactions")
+          .withIndex("by_user_date", (q) => q.eq("userId", user._id));
+      }
+    }
+
+    // Collect transactions with sort order
+    let transactions = await query.order(sortOrder).collect();
+
+    // Apply amount filters in memory (since Convex recommends using indexes over filter)
+    if (args.min_amount !== undefined) {
+      transactions = transactions.filter((tx) => tx.amount >= args.min_amount!);
+    }
+    if (args.max_amount !== undefined) {
+      transactions = transactions.filter((tx) => tx.amount <= args.max_amount!);
+    }
 
     return transactions;
   },
